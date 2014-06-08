@@ -1,0 +1,109 @@
+<script src="rv.js"></script>
+<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="rv-jquery.js"></script>
+
+<h1></h1>
+<input type="text" />
+<div></div>
+
+<script>
+
+console.log('EXAMPLE 1');
+
+var a = rv(),
+  b = rv(),
+  c,
+  sum = rv.lift(function (one, another) {
+    return one.value + another.value;
+  });
+
+a.value = 10;
+a.onchange(function (nv, ov) {
+  console.log('a changed to', nv, 'from', ov);
+});
+b.value = 20;
+c = sum(a, b);
+
+console.log(a.value, b.value, c.value);
+
+
+a.value = 100;
+b.value = 30;
+
+console.log(a.value, b.value, c.value);
+
+c.onchange(function (sum) {
+  console.log('Sum of a and b changed to ', sum);
+});
+
+a.value = 200;
+b.value = 60;
+
+console.log(a.value, b.value, c.value);
+
+
+
+
+console.log('---------');
+console.log('EXAMPLE 2');
+
+var note = {
+    rvTitle: rv("Note"),
+    rvText: rv("Here goes text...")
+  },
+  note2 = {
+    rvTitle: rv("Note2"),
+    rvText: rv("Here2 goes2 text2...")
+  };
+
+function NoteDisplay(initial) {
+  this.rvCurrentNote = rv(initial);
+  this.rvTitle = this.rvCurrentNote.map(function (rvSelf) {
+    return rvSelf.value.rvTitle.value;
+  });
+  this.rvText = rv("Yay!");
+}
+
+var nd = new NoteDisplay(note);
+nd.rvTitle.onchange(function (title) {
+  window.document.title = title;
+});
+
+console.log(nd.rvTitle.value);
+
+$(document).ready(function () {
+  $('h1').first().rvHtml(nd.rvTitle);
+  $('input').first().rvVal(nd.rvText);
+  $('div').first().rvHtml(nd.rvText);
+
+  nd.rvCurrentNote.value = note2;
+
+  setTimeout(function () {
+    nd.rvTitle.value = "Oops";
+  }, 1000);
+
+});
+
+
+
+
+
+
+console.log('---------');
+console.log('EXAMPLE 3');
+
+var rvNumbers = rv("1.0 30e3 20.07 50");
+var rvNumbersList = rvNumbers.map(function (rvStr) { return rvStr.value.split(/\s+/); });
+var rvNumbersIntList = rvNumbersList.map(function (rvArr) { var arr = [], i; for (i = 0; i < rvArr.value.length; i++) { arr.push(parseFloat(rvArr.value[i])); } return arr; });
+
+rvNumbersList.onchange(function () { console.log('list changed'); });
+rvNumbersIntList.onchange(function () { console.log('int list changed'); });
+
+console.log(rvNumbersList.value);
+console.log(rvNumbersIntList.value);
+
+rvNumbers.value = "1.9 23e3 18.07 30";
+
+console.log(rvNumbersList.value);
+console.log(rvNumbersIntList.value);
+</script>
