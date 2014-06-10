@@ -70,6 +70,10 @@ rv.prototype.onchange = function (handlerFn) {
   this._changeHandlers.push(handlerFn);
 };
 
+rv.prototype.cleanup = function () {
+  delete this._changeHandlers;
+};
+
 rv.prototype.link = function (rvOther) {
   if (!(rvOther instanceof rv)) throw "";
   this._linkedTo = rvOther;
