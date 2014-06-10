@@ -11,7 +11,6 @@ function rv(value) {
   this._deps; // = [];
   this._changeHandler;
   this._linkedTo;
-  this._valueBeforeLinking;
 
   if (arguments.length == 1) {
     this.value = value;
@@ -73,7 +72,6 @@ rv.prototype.onchange = function (handlerFn) {
 
 rv.prototype.link = function (rvOther) {
   if (!(rvOther instanceof rv)) throw "";
-  this._valueBeforeLinking = this._value;
   this._linkedTo = rvOther;
   if (!this._linkedTo._deps) { this._linkedTo._deps = []; }
   this._linkedTo._deps.push(this);
@@ -81,10 +79,8 @@ rv.prototype.link = function (rvOther) {
 };
 
 rv.prototype.unlink = function () {
-  this._value = this._valueBeforeLinking;
   this._linkedTo._deps.splice(this._linkedTo._deps.indexOf(this), 1);
   delete this._linkedTo;
-  delete this._valueBeforeLinking;
 };
 
 rv.lift = function (fn) {
