@@ -1,14 +1,16 @@
+function construct(constructor, args) {
+  function F() {
+    return constructor.apply(this, args);
+  }
+  F.prototype = constructor.prototype;
+  return new F();
+}
+
 function rv(value) {
   if (arguments.callee !== this.constructor) {
-    if (arguments.length == 0) {
-      return new arguments.callee();
-    } else if (arguments.length == 1) {
-      return new arguments.callee(arguments[0]);
-    } else if (arguments.length == 2) {
-      return new arguments.callee(arguments[0], arguments[1]);
-    } else {
-      throw new Error("rv constructor expects only 0, 1 or 2 arguments!");
-    }
+    var i, arr = [];
+    for (i = 0; i < arguments.length; i++) { arr.push('arguments[' + i + ']'); }
+    return eval('new arguments.callee(' + arr.join(',') + ');');
   }
 
   this._value;
@@ -16,6 +18,8 @@ function rv(value) {
   this._args;
   this._deps; // = [];
   this._changeHandler;
+  this._linkedTo;
+  this._valueBeforeLinking;
 
   if (arguments.length == 1) {
     this.value = value;
@@ -73,6 +77,22 @@ rv.prototype._calculateValue = function () {
 rv.prototype.onchange = function (handlerFn) {
   if (!this._changeHandlers) this._changeHandlers = [];
   this._changeHandlers.push(handlerFn);
+};
+
+rv.prototype.link = function (rvOther) {
+  if (!(rvOther instanceof rv)) throw "";
+  this._valueBeforeLinking = this._value;
+  this._linkedTo = rvOther;
+  if (!this._linkedTo._deps) { this._linkedTo._deps = []; }
+  this._linkedTo._deps.push(this);
+  this._value = this._linkedTo._value;
+};
+
+rv.prototype.unlink = function () {
+  this._value = this._valueBeforeLinking;
+  this._linkedTo._deps.splice(this._linkedTo._deps.indexOf(this), 1);
+  delete this._linkedTo;
+  delete this._valueBeforeLinking;
 };
 
 rv.lift = function (fn) {

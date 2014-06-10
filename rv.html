@@ -7,45 +7,63 @@
 <div></div>
 
 <script>
-
 console.log('EXAMPLE 1');
+console.log('---------');
 
-var a = rv(),
-  b = rv(),
-  c,
-  sum = rv.lift(function (one, another) {
-    return one.value + another.value;
+var rvFirst = rv(1),
+  rvSecond = rv(2);
+rvSecond.link(rvFirst);
+
+console.log(rvFirst.value, rvSecond.value);
+
+rvFirst.value = 3;
+console.log(rvFirst.value, rvSecond.value);
+
+rvSecond.unlink();
+console.log(rvFirst.value, rvSecond.value);
+
+
+
+
+console.log('EXAMPLE 2');
+console.log('---------');
+
+var rvA = rv(),
+  rvB = rv(),
+  rvC,
+  sum = rv.lift(function (rvOne, rvAnother) {
+    return rvOne.value + rvAnother.value;
   });
 
-a.value = 10;
-a.onchange(function (nv, ov) {
+rvA.value = 10;
+rvA.onchange(function (nv, ov) {
   console.log('a changed to', nv, 'from', ov);
 });
-b.value = 20;
-c = sum(a, b);
+rvB.value = 20;
+rvC = sum(rvA, rvB);
 
-console.log(a.value, b.value, c.value);
+console.log(rvA.value, rvB.value, rvC.value);
 
 
-a.value = 100;
-b.value = 30;
+rvA.value = 100;
+rvB.value = 30;
 
-console.log(a.value, b.value, c.value);
+console.log(rvA.value, rvB.value, rvC.value);
 
-c.onchange(function (sum) {
+rvC.onchange(function (sum) {
   console.log('Sum of a and b changed to ', sum);
 });
 
-a.value = 200;
-b.value = 60;
+rvA.value = 200;
+rvB.value = 60;
 
-console.log(a.value, b.value, c.value);
+console.log(rvA.value, rvB.value, rvC.value);
 
 
 
 
 console.log('---------');
-console.log('EXAMPLE 2');
+console.log('EXAMPLE 3');
 
 var note = {
     rvTitle: rv("Note"),
@@ -90,7 +108,7 @@ $(document).ready(function () {
 
 
 console.log('---------');
-console.log('EXAMPLE 3');
+console.log('EXAMPLE 4');
 
 var rvNumbers = rv("1.0 30e3 20.07 50");
 var rvNumbersList = rvNumbers.map(function (rvStr) { return rvStr.value.split(/\s+/); });
