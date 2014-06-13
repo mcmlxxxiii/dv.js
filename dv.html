@@ -1,0 +1,128 @@
+<script src="dv.js"></script>
+<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="dv-jquery.js"></script>
+
+<h1></h1>
+<input type="text" />
+<div></div>
+
+<script>
+console.log('EXAMPLE 1');
+console.log('---------');
+
+var dvFirst = dv(1),
+  dvSecond = dv(2);
+dvSecond.link(dvFirst);
+
+console.log(dvFirst.value, dvSecond.value);
+
+dvFirst.value = 3;
+console.log(dvFirst.value, dvSecond.value);
+
+dvSecond.unlink();
+console.log(dvFirst.value, dvSecond.value);
+
+
+
+
+console.log('EXAMPLE 2');
+console.log('---------');
+
+var dvA = dv(),
+  dvB = dv(),
+  dvC,
+  sum = dv.lift(function (dvOne, dvAnother) {
+    return dvOne.value + dvAnother.value;
+  });
+
+dvA.value = 10;
+dvA.onchange(function (nv, ov) {
+  console.log('a changed to', nv, 'from', ov);
+});
+dvB.value = 20;
+dvC = sum(dvA, dvB);
+
+console.log(dvA.value, dvB.value, dvC.value);
+
+
+dvA.value = 100;
+dvB.value = 30;
+
+console.log(dvA.value, dvB.value, dvC.value);
+
+dvC.onchange(function (sum) {
+  console.log('Sum of a and b changed to ', sum);
+});
+
+dvA.value = 200;
+dvC.cleanup();
+dvB.value = 60;
+
+console.log(dvA.value, dvB.value, dvC.value);
+
+
+
+
+console.log('---------');
+console.log('EXAMPLE 3');
+
+var note = {
+    dvTitle: dv("Note"),
+    dvText: dv("Here goes text...")
+  },
+  note2 = {
+    dvTitle: dv("Note2"),
+    dvText: dv("Here2 goes2 text2...")
+  };
+
+function NoteDisplay(initial) {
+  this.dvCurrentNote = dv(initial);
+  this.dvTitle = this.dvCurrentNote.map(function (dvSelf) {
+    return dvSelf.value.dvTitle.value;
+  });
+  this.dvText = dv("Yay!");
+}
+
+var nd = new NoteDisplay(note);
+nd.dvTitle.onchange(function (title) {
+  window.document.title = title;
+});
+
+console.log(nd.dvTitle.value);
+
+$(document).ready(function () {
+  $('h1').first().dvHtml(nd.dvTitle);
+  $('input').first().dvVal(nd.dvText);
+  $('div').first().dvHtml(nd.dvText);
+
+  nd.dvCurrentNote.value = note2;
+
+  setTimeout(function () {
+    nd.dvTitle.value = "Oops";
+  }, 1000);
+
+});
+
+
+
+
+
+
+console.log('---------');
+console.log('EXAMPLE 4');
+
+var dvNumbers = dv("1.0 30e3 20.07 50");
+var dvNumbersList = dvNumbers.map(function (dvStr) { return dvStr.value.split(/\s+/); });
+var dvNumbersIntList = dvNumbersList.map(function (dvArr) { var arr = [], i; for (i = 0; i < dvArr.value.length; i++) { arr.push(parseFloat(dvArr.value[i])); } return arr; });
+
+dvNumbersList.onchange(function () { console.log('list changed'); });
+dvNumbersIntList.onchange(function () { console.log('int list changed'); });
+
+console.log(dvNumbersList.value);
+console.log(dvNumbersIntList.value);
+
+dvNumbers.value = "1.9 23e3 18.07 30";
+
+console.log(dvNumbersList.value);
+console.log(dvNumbersIntList.value);
+</script>
