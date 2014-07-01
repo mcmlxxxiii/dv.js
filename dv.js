@@ -1,6 +1,6 @@
 function dv(value) {
+  var i, arr =[];
   if (arguments.callee !== this.constructor) {
-    var i, arr = [];
     for (i = 0; i < arguments.length; i++) { arr.push('arguments[' + i + ']'); }
     return eval('new arguments.callee(' + arr.join(',') + ');');
   }
@@ -12,17 +12,34 @@ function dv(value) {
   this._changeHandler;
   this._linkedTo;
 
-  if (arguments.length == 1) {
-    this.value = value;
-  } else if (arguments.length == 2) {
-    this._fn = arguments[0];
-    this._args = arguments[1];
-    for (var i = 0; i < this._args.length; i++) {
+  if (arguments.length == 2) {
+    var fn = arguments[0],
+      args = arguments[1];
+    if (typeof fn !== 'function') {
+      throw new Error('dv: when 2 args, 1st should be function!');
+    }
+    if (!(args instanceof Array)) {
+      throw new Error('dv: when 2 args, 2nd should be array of dv!');
+    }
+
+    for (i = 0; i < args.length; i++) {
+      if (!(args[i] instanceof this.constructor)) {
+          throw new Error('dv: when 2 args, 2nd (array) should consist only '+
+                          'of dynamic values! (element '+i+' is not a dv)');
+      }
+    }
+    this._fn = fn;
+    this._args = args;
+    for (i = 0; i < this._args.length; i++) {
       if (!this._args[i]._deps) { this._args[i]._deps = []; }
       this._args[i]._deps.push(this);
     }
     this._calculateValue();
   }
+
+  else {
+    this.value = value;
+  } 
 }
 
 dv.prototype.__defineGetter__('value', function () {
