@@ -39,7 +39,7 @@ function dv(value) {
 
   else {
     this.value = value;
-  } 
+  }
 }
 
 dv.prototype.__defineGetter__('value', function () {
@@ -64,21 +64,28 @@ dv.prototype._triggerChange = function (newValue, oldValue) {
 };
 
 dv.prototype._propagateChange = function () {
-  if (this._deps) {
-    for (var i = 0; i < this._deps.length; i++) {
+  var i;
+  if (this._deps instanceof Array) {
+    for (i = 0; i < this._deps.length; i++) {
       this._deps[i]._calculateValue();
-      this._deps[i]._propagateChange();
     }
   }
 };
 
 dv.prototype._calculateValue = function () {
-  if (!this._args || !this._fn) return;
-  var newValue = this._fn.apply(null, this._args),
+  var newValue,
+    oldValue;
+  if (this._linkedTo !== undefined && this._linkedTo !== this) {
+    newValue = this._linkedTo._value;
     oldValue = this._value;
+  } else if (this._args instanceof Array && typeof this._fn === 'function') {
+    newValue = this._fn.apply(null, this._args);
+    oldValue = this._value;
+  }
   if (newValue !== oldValue) {
     this._value = newValue;
     this._triggerChange(newValue, oldValue);
+    this._propagateChange();
   }
 };
 
@@ -92,7 +99,8 @@ dv.prototype.cleanup = function () {
 };
 
 dv.prototype.link = function (dvOther) {
-  if (!(dvOther instanceof dv)) throw "";
+  if (!(dvOther instanceof dv) || this === dvOther)
+    throw new Error('dv: #link only accepts other dv as single argument!');
   this._linkedTo = dvOther;
   if (!this._linkedTo._deps) { this._linkedTo._deps = []; }
   this._linkedTo._deps.push(this);
@@ -100,7 +108,11 @@ dv.prototype.link = function (dvOther) {
 };
 
 dv.prototype.unlink = function () {
+  if (this._linkedTo === undefined) return;
   this._linkedTo._deps.splice(this._linkedTo._deps.indexOf(this), 1);
+  if (this._linkedTo._deps.length === 0) {
+    delete this._linkedTo._deps;
+  }
   delete this._linkedTo;
 };
 
