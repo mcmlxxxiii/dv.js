@@ -1,0 +1,49 @@
+<script src="../dv.js"></script>
+<script src="../tests/lib/jquery-2.1.1.min.js"></script>
+<script src="../dv-jquery.js"></script>
+<script>
+
+var note = {
+    dvTitle: dv("dv.js"),
+    dvText: dv("Few awesome letters")
+  },
+  note2 = {
+    dvTitle: dv("Mind this"),
+    dvText: dv("text tetx xetx")
+  };
+
+function NoteDisplay(initial) {
+  this.dvCurrentNote = dv(initial);
+  this.dvTitle = this.dvCurrentNote.map(function (dvSelf) {
+    return dvSelf.value.dvTitle.value;
+  });
+  this.dvText = dv("Type here please!");
+}
+
+var nd = new NoteDisplay(note);
+
+nd.dvTitle.onchange(function (title) {
+  window.document.title = title;
+});
+
+$(document).ready(function () {
+  $('h1').first().dvHtml(nd.dvTitle);
+  $('input').first().dvVal(nd.dvText);
+  $('div').first().dvHtml(nd.dvText);
+
+  nd.dvCurrentNote.value = note2;
+
+  setTimeout(function () {
+    nd.dvTitle.value = "Magic";
+  }, 1000);
+
+});
+
+</script>
+
+
+
+
+<h1></h1>
+<input type="text" />
+<div></div>
