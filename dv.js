@@ -42,6 +42,47 @@ function dv(value) {
   }
 }
 
+
+dv.lift = function (fn) {
+  var cls = this;
+  return function () {
+    return new cls(fn, Array.prototype.slice.call(arguments));
+  };
+};
+
+
+dv.prototype.onchange = function (handlerFn) {
+  if (!this._changeHandlers) this._changeHandlers = [];
+  this._changeHandlers.push(handlerFn);
+};
+
+dv.prototype.cleanup = function () {
+  delete this._changeHandlers;
+};
+
+dv.prototype.link = function (dvOther) {
+  if (!(dvOther instanceof dv) || this === dvOther)
+    throw new Error('dv: #link only accepts other dv as single argument!');
+  this._linkedTo = dvOther;
+  if (!this._linkedTo._deps) { this._linkedTo._deps = []; }
+  this._linkedTo._deps.push(this);
+  this._value = this._linkedTo._value;
+};
+
+dv.prototype.unlink = function () {
+  if (this._linkedTo === undefined) return;
+  this._linkedTo._deps.splice(this._linkedTo._deps.indexOf(this), 1);
+  if (this._linkedTo._deps.length === 0) {
+    delete this._linkedTo._deps;
+  }
+  delete this._linkedTo;
+};
+
+dv.prototype.map = function (mapFn) {
+  return dv.lift(mapFn)(this);
+};
+
+
 dv.prototype.__defineGetter__('value', function () {
   return this._value;
 });
@@ -54,6 +95,7 @@ dv.prototype.__defineSetter__('value', function (newValue) {
     this._propagateChange();
   }
 });
+
 
 dv.prototype._triggerChange = function (newValue, oldValue) {
   if (this._changeHandlers) {
@@ -89,40 +131,3 @@ dv.prototype._calculateValue = function () {
   }
 };
 
-dv.prototype.onchange = function (handlerFn) {
-  if (!this._changeHandlers) this._changeHandlers = [];
-  this._changeHandlers.push(handlerFn);
-};
-
-dv.prototype.cleanup = function () {
-  delete this._changeHandlers;
-};
-
-dv.prototype.link = function (dvOther) {
-  if (!(dvOther instanceof dv) || this === dvOther)
-    throw new Error('dv: #link only accepts other dv as single argument!');
-  this._linkedTo = dvOther;
-  if (!this._linkedTo._deps) { this._linkedTo._deps = []; }
-  this._linkedTo._deps.push(this);
-  this._value = this._linkedTo._value;
-};
-
-dv.prototype.unlink = function () {
-  if (this._linkedTo === undefined) return;
-  this._linkedTo._deps.splice(this._linkedTo._deps.indexOf(this), 1);
-  if (this._linkedTo._deps.length === 0) {
-    delete this._linkedTo._deps;
-  }
-  delete this._linkedTo;
-};
-
-dv.lift = function (fn) {
-  var cls = this;
-  return function () {
-    return cls(fn, Array.prototype.slice.call(arguments));
-  };
-};
-
-dv.prototype.map = function (mapFn) {
-  return dv.lift(mapFn)(this);
-};
