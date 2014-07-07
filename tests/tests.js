@@ -144,30 +144,38 @@ test( "w/ value (2 args: 1st — function, 2nd — array of dv)", function() {
 });
 
 
-module("Methods");
+module("#onchange method");
 
-test( "onchange", function() {
+test( "should remember change handlers in the order they are registered", function() {
   var v = dv(3),
     spy1 = sinon.spy(),
     spy2 = sinon.spy(),
     spy3 = sinon.spy();
 
   v.onchange(spy1);
-  v.onchange(spy3);
-  v.onchange(spy2);
+  deepEqual(v._changeHandlers, [ spy1 ]);
 
+  v.onchange(spy3);
+  deepEqual(v._changeHandlers, [ spy1, spy3 ]);
+
+  v.onchange(spy2);
   deepEqual(v._changeHandlers, [ spy1, spy3, spy2 ]);
 });
 
-test( "cleanup", function() {
+
+module('#cleanup method');
+
+test( "should cleanup change handlers", function() {
   var v = dv(3),
     spy1 = sinon.spy(),
     spy2 = sinon.spy(),
     spy3 = sinon.spy();
 
   v.onchange(spy1);
-  v.onchange(spy3);
   v.onchange(spy2);
+  v.onchange(spy3);
+
+  deepEqual(v._changeHandlers, [ spy1, spy2, spy3 ]);
 
   v.cleanup();
 
@@ -303,3 +311,26 @@ test( 'should propagate change to linked instances', function() {
   ok( v2._value == 2);
   ok( v3._value == 2);
 });
+
+test( 'should trigger change before propagating it', function() {
+  var v = dv(3),
+    v2 = dv(4),
+    trigger = sinon.spy(v, '_triggerChange'),
+    propagate = sinon.spy(v, '_propagateChange');
+
+  v2.link(v);
+  v.value = 2;
+
+  ok( trigger.calledOnce );
+  ok( propagate.calledOnce );
+  sinon.assert.callOrder( trigger, propagate );
+});
+
+
+module('.lift method');
+module('#map method');
+
+
+module('#_calculateValue method');
+module('#_propagateChange method');
+module('#_triggerChange method');
