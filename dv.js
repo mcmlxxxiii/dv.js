@@ -1,3 +1,12 @@
+/*
+ * dv.js v0.1
+ *
+ * Copyright 2014 by Mykhaylo Gavrylyuk, https://github.com/mcmlxxxiii
+ * Licensed under the MIT license
+ *
+ * Date: Sun Jul 6, 2014
+ */
+
 dv = (function () {
 
   function dv(value) {
