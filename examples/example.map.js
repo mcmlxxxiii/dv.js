@@ -11,14 +11,6 @@ var dv = require('../dv'),
     return arr;
   });
 
-dvNumbersList.onchange(function () {
-  console.log('list changed');
-});
-
-dvNumbersIntList.onchange(function () {
-  console.log('int list changed');
-});
-
 console.log(dvNumbersList.value);
 // [ '1.0', '30e3', '20.07', '50' ]
 
@@ -26,8 +18,6 @@ console.log(dvNumbersIntList.value);
 // [ 1, 30000, 20.07, 50 ]
 
 dvNumbers.value = "1.9 23e3 18.07 30";
-// list changed
-// int list changed
 
 console.log(dvNumbersList.value);
 // [ '1.9', '23e3', '18.07', '30' ]
