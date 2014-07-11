@@ -104,7 +104,7 @@ test('wo/ keyword `new`', function() {
 module('Creating dv w/ value (2 args: 1st — function, 2nd — array not of dv)');
 
 test('w/ keyword `new`', function() {
-  var fn = function (a, b, c) { return a.value + b.value + c; },
+  var fn = function (a, b, c) { return a + b + c; },
     dvA = new dv(1),
     dvB = new dv(2),
     dvC = 3;
@@ -113,7 +113,7 @@ test('w/ keyword `new`', function() {
 });
 
 test('wo/ keyword `new`', function() {
-  var fn = function (a, b, c) { return a.value + b.value + c; },
+  var fn = function (a, b, c) { return a + b + c; },
     dvA = dv(1),
     dvB = dv(2),
     dvC = 3;
@@ -125,7 +125,7 @@ test('wo/ keyword `new`', function() {
 module('Creating dv w/ value (2 args: 1st — function, 2nd — array of dv)');
 
 test('w/ keyword `new`', function() {
-  var fn = function (a, b, c) { return a.value + b.value + c.value; },
+  var fn = function (a, b, c) { return a + b + c; },
     dvA = new dv(1),
     dvB = new dv(2),
     dvC = new dv(3),
@@ -137,7 +137,7 @@ test('w/ keyword `new`', function() {
 });
 
 test('wo/ keyword `new`', function() {
-  var fn = function (a, b, c) { return a.value + b.value + c.value; },
+  var fn = function (a, b, c) { return a + b + c; },
     dvA = dv(1),
     dvB = dv(2),
     dvC = dv(3),
@@ -159,7 +159,7 @@ test('should return correct dv lift constructor', function () {
     dvC = dv(3),
     lifted,
     liftFn = function (a, b, c) {
-      return a.value + b.value + c.value;
+      return a + b + c;
     };
 
   sinon.spy(window, 'dv');
@@ -291,7 +291,7 @@ module('#value getter');
 test('should return correct value', function() {
   var v = dv(3);
   v._value = 123;
-  ok(v.value = 123);
+  ok(v.value == 123);
 });
 
 
@@ -301,7 +301,7 @@ module('#value setter');
 test('should set value correctly', function() {
   var v = dv(3);
   v.value = 123;
-  ok(v._value = 123);
+  ok(v._value == 123);
 });
 
 test('should trigger change handlers', function() {
@@ -372,7 +372,7 @@ module('#map method');
 
 test('should return new dv lifted from self with function provided', function () {
   var dvStr = dv('abc'),
-    mapFn = function (d) { return d.value.length; },
+    mapFn = function (d) { return d.length; },
     mapped = dvStr.map(mapFn);
 
   ok(mapped instanceof dv);

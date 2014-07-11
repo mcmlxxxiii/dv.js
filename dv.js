@@ -10,7 +10,7 @@
 dv = (function () {
 
   function dv(value) {
-    var i, arr =[];
+    var i, arr = [];
     if (arguments.callee !== this.constructor) {
       for (i = 0; i < arguments.length; i++) { arr.push('arguments[' + i + ']'); }
       return eval('new arguments.callee(' + arr.join(',') + ');');
@@ -127,12 +127,17 @@ dv = (function () {
 
   dv.prototype._calculateValue = function () {
     var newValue,
-      oldValue;
+      oldValue,
+      i,
+      argValues = [];
     if (this._linkedTo !== undefined && this._linkedTo !== this) {
       newValue = this._linkedTo._value;
       oldValue = this._value;
     } else if (this._args instanceof Array && typeof this._fn === 'function') {
-      newValue = this._fn.apply(null, this._args);
+      for (i = 0; i < this._args.length; i++) {
+        argValues.push( this._args[i].value );
+      }
+      newValue = this._fn.apply(null, argValues);
       oldValue = this._value;
     }
     if (newValue !== oldValue) {

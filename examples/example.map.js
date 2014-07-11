@@ -1,12 +1,12 @@
 var dv = require('../dv'),
   dvNumbers = dv("1.0 30e3 20.07 50"),
-  dvNumbersList = dvNumbers.map(function (dvStr) {
-    return dvStr.value.split(/\s+/);
+  dvNumbersList = dvNumbers.map(function (string) {
+    return string.split(/\s+/);
   }),
-  dvNumbersIntList = dvNumbersList.map(function (dvArr) {
+  dvNumbersIntList = dvNumbersList.map(function (ary) {
     var arr = [], i;
-    for (i = 0; i < dvArr.value.length; i++) {
-      arr.push(parseFloat(dvArr.value[i]));
+    for (i = 0; i < ary.length; i++) {
+      arr.push(parseFloat(ary[i]));
     }
     return arr;
   });
