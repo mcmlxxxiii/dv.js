@@ -137,7 +137,7 @@ dv = (function () {
       for (i = 0; i < this._args.length; i++) {
         argValues.push( this._args[i].value );
       }
-      newValue = this._fn.apply(null, argValues);
+      newValue = this._fn.apply(this._value, argValues);
       oldValue = this._value;
     }
     if (newValue !== oldValue) {

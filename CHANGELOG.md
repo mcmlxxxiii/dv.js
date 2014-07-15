@@ -1,6 +1,8 @@
 ## Next
 
-Lifting function now provides dvs' values as arguments, not dvs.
+2. Lifting function now provides current values as context (this).
+
+1. Lifting function now provides dvs' values as arguments, not dvs.
 It is better explained by the example.
 
 **How it was previously:**

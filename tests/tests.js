@@ -367,6 +367,25 @@ test('should trigger change before propagating it', function() {
   sinon.assert.callOrder(trigger, propagate);
 });
 
+test('lift function should receive current value as context (this)', function () {
+  var lift,
+    dvA = dv(1),
+    dvB = dv(2),
+    dvC = dv(3),
+    values = [],
+    lifted = dv.lift(function (a, b, c) {
+       values.push(this);
+      return a + b + c;
+    })(dvA, dvB, dvC);
+
+  dvA.value = 4;
+  dvB.value = 5;
+  dvC.value = 6;
+
+  deepEqual(values, [ window, 6, 9, 12 ]);
+  ok(lifted.value == 15);
+});
+
 
 module('#map method');
 
