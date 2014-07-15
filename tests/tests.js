@@ -373,8 +373,14 @@ test('lift function should receive current value as context (this)', function ()
     dvB = dv(2),
     dvC = dv(3),
     values = [],
+    values2 = [],    
     lifted = dv.lift(function (a, b, c) {
-       values.push(this);
+      values.push(this);
+      return a + b + c;
+    })(dvA, dvB, dvC),
+    lifted2 = dv.lift(function (a, b, c) {
+       'use strict';
+      values2.push(this);
       return a + b + c;
     })(dvA, dvB, dvC);
 
@@ -383,8 +389,9 @@ test('lift function should receive current value as context (this)', function ()
   dvC.value = 6;
 
   deepEqual(values, [ window, 6, 9, 12 ]);
-  ok(lifted.value == 15);
+  deepEqual(values2, [ undefined, 6, 9, 12 ]);
 });
+
 
 
 module('#map method');
