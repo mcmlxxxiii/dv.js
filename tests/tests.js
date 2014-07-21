@@ -229,6 +229,58 @@ test('should return correct dv lift constructor', function () {
   window.dv.restore();
 });
 
+test('lift function should calculate value when there is no initial value provided', function () {
+  var lift,
+    dvA = dv(1),
+    dvB = dv(2),
+    dvC = dv(3),
+    lifted,
+    liftFn = function (a, b, c) {
+      return a + b + c;
+    };
+
+  sinon.spy(window, 'dv');
+
+  lift = dv.lift(liftFn);
+
+  equal(dv.callCount, 0);
+
+  lifted = lift(dvA, dvB, dvC);
+
+  ok(dv.calledOnce);
+  ok(dv.calledWithNew());
+  ok(dv.calledWith(liftFn, [ dvA, dvB, dvC ]));
+  equal(lifted._value, 6);
+
+  window.dv.restore();
+});
+
+test('lift function should not calculate value when there is initial value provided', function () {
+  var lift,
+    dvA = dv(1),
+    dvB = dv(2),
+    dvC = dv(3),
+    lifted,
+    liftFn = function (a, b, c) {
+      return a + b + c;
+    };
+
+  sinon.spy(window, 'dv');
+
+  lift = dv.lift(liftFn);
+
+  equal(dv.callCount, 0);
+
+  lifted = lift(dvA, dvB, dvC, 15);
+
+  ok(dv.calledOnce);
+  ok(dv.calledWithNew());
+  ok(dv.calledWith(liftFn, [ dvA, dvB, dvC ], 15));
+  equal(lifted._value, 15);
+
+  window.dv.restore();
+});
+
 
 
 module('#onchange method');
@@ -477,5 +529,39 @@ test('should return new dv lifted from self with function provided', function ()
 
   dvStr.value = 'abcdefghi';
   ok(mapped.value == 9);
+});
+
+test('should calculate value when there is no initial value provided', function () {
+  var dvA = dv('abcdefghijk'),
+    mapFn = function (str) { return str.length; },
+    dvB;
+
+  sinon.spy(dv, 'lift');
+
+  dvB = dvA.map(mapFn);
+
+  ok(dv.lift.calledOnce);
+  ok(dv.lift.calledWith(mapFn));
+
+  equal(dvB._value, 11);
+
+  window.dv.lift.restore();
+});
+
+test('should not calculate value when there is initial value provided', function () {
+  var dvA = dv('abcdefghijk'),
+    mapFn = function (str) { return str.length; },
+    dvB;
+
+  sinon.spy(dv, 'lift');
+
+  dvB = dvA.map(mapFn, 10001);
+
+  ok(dv.lift.calledOnce);
+  ok(dv.lift.calledWith(mapFn));
+
+  equal(dvB._value, 10001);
+
+  window.dv.lift.restore();
 });
 

@@ -75,7 +75,7 @@ dv = (function () {
     return function () {
       var args = Array.prototype.slice.call(arguments, 0, argNames.length),
         initialValue = arguments[argNames.length];
-      if (args.length > argNames.length) {
+      if (arguments.length > argNames.length) {
         return new cls(fn, args, initialValue);
       } else {
         return new cls(fn, args);
