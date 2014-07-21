@@ -1,5 +1,12 @@
 ## Next
 
+(4) dv#link and dv#unlink now return self, so that shortcuts like following are possible.
+
+```
+var dvA = dv().link(dvB);
+var dvC = dvD.unlink().link(dvB);
+```
+
 (3) Initial value for mappings and lifts to avoid calculatioins on init.
 
 ```

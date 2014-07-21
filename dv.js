@@ -100,6 +100,7 @@ dv = (function () {
     if (!this._linkedTo._deps) { this._linkedTo._deps = []; }
     this._linkedTo._deps.push(this);
     this._value = this._linkedTo._value;
+    return this;
   };
 
   dv.prototype.unlink = function () {
@@ -109,6 +110,7 @@ dv = (function () {
       delete this._linkedTo._deps;
     }
     delete this._linkedTo;
+    return this;
   };
 
   dv.prototype.map = function (mapFn, initialValue) {

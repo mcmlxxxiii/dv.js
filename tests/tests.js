@@ -307,6 +307,14 @@ test('should link to other dv and grab its value', function() {
   ok(v2._value == 4);
 });
 
+test('should return self', function() {
+  var v = dv(3),
+    v2 = dv(2),
+    otherV = dv(4);
+
+  ok(v === v.link(otherV));
+});
+
 
 
 module('#unlink method');
@@ -333,6 +341,18 @@ test('should do nothing if not linked', function() {
   v.unlink()
   ok(true, 'should not shout');
   ok(v._value == 3);
+});
+
+test('should return self', function() {
+  var v = dv(3),
+    v2 = dv(2),
+    otherV = dv(4);
+
+  v.link(otherV);
+  v2.link(otherV);
+
+  ok(v.unlink() === v);
+  ok(v2.unlink() === v2);
 });
 
 
