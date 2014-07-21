@@ -23,29 +23,39 @@ dv = (function () {
     this._changeHandler;
     this._linkedTo;
 
-    if (arguments.length == 2) {
+    if (arguments.length > 1) {
       var fn = arguments[0],
         args = arguments[1];
+
       if (typeof fn !== 'function') {
-        throw new Error('dv: when 2 args, 1st should be function!');
+        throw new Error('dv: when 2+ args, 1st should be function!');
       }
+
       if (!(args instanceof Array)) {
-        throw new Error('dv: when 2 args, 2nd should be array of dv!');
+        throw new Error('dv: when 2+ args, 2nd should be array of dv!');
       }
 
       for (i = 0; i < args.length; i++) {
         if (!(args[i] instanceof this.constructor)) {
-            throw new Error('dv: when 2 args, 2nd (array) should consist only '+
+            throw new Error('dv: when 2+ args, 2nd (array) should consist only '+
                             'of dynamic values! (element '+i+' is not a dv)');
         }
       }
+
       this._fn = fn;
       this._args = args;
+
       for (i = 0; i < this._args.length; i++) {
         if (!this._args[i]._deps) { this._args[i]._deps = []; }
         this._args[i]._deps.push(this);
       }
-      this._calculateValue();
+
+      // Not `if (value) {...` because it might be falsy,
+      if (arguments.length > 2) {
+        this._value = arguments[2];
+      } else {
+        this._calculateValue();
+      }
     }
 
     else {
@@ -55,9 +65,21 @@ dv = (function () {
 
 
   dv.lift = function (fn) {
-    var cls = this;
+    var cls = this,
+      fnCode = fn.toString(),
+      iBracketO = fnCode.indexOf('('),
+      iBracketC = fnCode.indexOf(')'),
+      fnSignature = fnCode.substr(iBracketO + 1, iBracketC - iBracketO - 1),
+      argNames = fnSignature.split(/\s*,\s*/);
+
     return function () {
-      return new cls(fn, Array.prototype.slice.call(arguments));
+      var args = Array.prototype.slice.call(arguments, 0, argNames.length),
+        initialValue = arguments[argNames.length];
+      if (args.length > argNames.length) {
+        return new cls(fn, args, initialValue);
+      } else {
+        return new cls(fn, args);
+      }
     };
   };
 
@@ -89,8 +111,12 @@ dv = (function () {
     delete this._linkedTo;
   };
 
-  dv.prototype.map = function (mapFn) {
-    return dv.lift(mapFn)(this);
+  dv.prototype.map = function (mapFn, initialValue) {
+    if (arguments.length > 1) {
+      return dv.lift(mapFn)(this, initialValue);
+    } else {
+      return dv.lift(mapFn)(this);
+    }
   };
 
 
@@ -125,19 +151,23 @@ dv = (function () {
     }
   };
 
+  dv.prototype._argsValues = function () {
+    var i,
+      values = [];
+    for (i = 0; i < this._args.length; i++) {
+      values.push(this._args[i].value);
+    }
+    return values;
+  };
+
   dv.prototype._calculateValue = function () {
     var newValue,
-      oldValue,
-      i,
-      argValues = [];
+      oldValue;
     if (this._linkedTo !== undefined && this._linkedTo !== this) {
       newValue = this._linkedTo._value;
       oldValue = this._value;
     } else if (this._args instanceof Array && typeof this._fn === 'function') {
-      for (i = 0; i < this._args.length; i++) {
-        argValues.push( this._args[i].value );
-      }
-      newValue = this._fn.apply(this._value, argValues);
+      newValue = this._fn.apply(this._value, this._argsValues());
       oldValue = this._value;
     }
     if (newValue !== oldValue) {

@@ -1,8 +1,20 @@
 ## Next
 
-2. Lifting function now provides current values as context (this).
+(3) Initial value for mappings and lifts to avoid calculatioins on init.
 
-1. Lifting function now provides dvs' values as arguments, not dvs.
+```
+var sum = dv.lift(function (a, b, c) {
+  return a + b + c;
+})(dvA, dvB, dvC, 1001);
+
+var strSize = dv.lift(function (str) {
+  return str.length;
+})(dvStr, 0);
+```
+
+(2) Lifting function now provides current values as context (this).
+
+(1) Lifting function now provides dvs' values as arguments, not dvs.
 It is better explained by the example.
 
 **How it was previously:**

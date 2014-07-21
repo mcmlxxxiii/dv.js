@@ -48,41 +48,16 @@ test('wo/ keyword `new`', function() {
 });
 
 
-module('Creating dv w/ value (not 2 args — 3)');
-
-test('w/ keyword `new`', function() {
-  var v = new dv(2.3, 3.4, 4.5);
-  ok(v instanceof dv);
-  ok(v._value == 2.3);
-  ok(v._fn == undefined);
-  ok(v._args == undefined);
-  ok(v._deps == undefined);
-  ok(v._changeHandler == undefined);
-  ok(v._linkedTo == undefined);
-});
-
-test('wo/ keyword `new`', function() {
-  var v = dv(2.3, 3.4, 4.5);
-  ok(v instanceof dv);
-  ok(v._value == 2.3);
-  ok(v._fn == undefined);
-  ok(v._args == undefined);
-  ok(v._deps == undefined);
-  ok(v._changeHandler == undefined);
-  ok(v._linkedTo == undefined);
-});
-
-
 module('Creating dv w/ value (2 args: 1st — not a function, 2nd — an array)');
 
 test('w/ keyword `new`', function() {
   throws(function () { var v = new dv(1, []); },
-    Error, 'dv: when 2 args, 1st should be function!');
+    Error, 'dv: when 2+ args, 1st should be function!');
 });
 
 test('wo/ keyword `new`', function() {
   throws(function () { var v = dv(1, []); },
-    Error, 'dv: when 2 args, 1st should be function!');
+    Error, 'dv: when 2+ args, 1st should be function!');
 });
 
 
@@ -91,13 +66,13 @@ module('Creating dv w/ value (2 args: 1st — function, 2nd — not an array)');
 test('w/ keyword `new`', function() {
   var fn = function () {};
   throws(function () { var v = new dv(fn, 3); },
-    Error, 'dv: when 2 args, 2nd should be array of dv!');
+    Error, 'dv: when 2+ args, 2nd should be array of dv!');
 });
 
 test('wo/ keyword `new`', function() {
   var fn = function () {};
   throws(function () { var v = new dv(fn, 3); },
-    Error, 'dv: when 2 args, 2nd should be array of dv!');
+    Error, 'dv: when 2+ args, 2nd should be array of dv!');
 });
 
 
@@ -109,7 +84,7 @@ test('w/ keyword `new`', function() {
     dvB = new dv(2),
     dvC = 3;
   throws(function () { var v = new dv(fn, [dvA, dvB, dvC]); },
-    Error, 'dv: when 2 args, 2nd (array) should consist only of dynamic values! (element 2 is not a dv)');
+    Error, 'dv: when 2+ args, 2nd (array) should consist only of dynamic values! (element 2 is not a dv)');
 });
 
 test('wo/ keyword `new`', function() {
@@ -118,7 +93,7 @@ test('wo/ keyword `new`', function() {
     dvB = dv(2),
     dvC = 3;
   throws(function () { var v = dv(fn, [dvA, dvB, dvC]); },
-    Error, 'dv: when 2 args, 2nd (array) should consist only of dynamic values! (element 2 is not a dv)');
+    Error, 'dv: when 2+ args, 2nd (array) should consist only of dynamic values! (element 2 is not a dv)');
 });
 
 
@@ -149,6 +124,82 @@ test('wo/ keyword `new`', function() {
 });
 
 
+module('Creating dv w/ value (2+ args: 1st — not a function, 2nd — an array, 3rd — initial value)');
+
+test('w/ keyword `new`', function() {
+  throws(function () { var v = new dv(1, [], 2); },
+    Error, 'dv: when 2+ args, 1st should be function!');
+});
+
+test('wo/ keyword `new`', function() {
+  throws(function () { var v = dv(1, [], 3); },
+    Error, 'dv: when 2+ args, 1st should be function!');
+});
+
+
+module('Creating dv w/ value (3+ args: 1st — function, 2nd — not an array, 3rd — initial value)');
+
+test('w/ keyword `new`', function() {
+  var fn = function () {};
+  throws(function () { var v = new dv(fn, 3, 1); },
+    Error, 'dv: when 2+ args, 2nd should be array of dv!');
+});
+
+test('wo/ keyword `new`', function() {
+  var fn = function () {};
+  throws(function () { var v = new dv(fn, 3, 2); },
+    Error, 'dv: when 2+ args, 2nd should be array of dv!');
+});
+
+
+module('Creating dv w/ value (3+ args: 1st — function, 2nd — array not of dv, 3rd — initial value)');
+
+test('w/ keyword `new`', function() {
+  var fn = function (a, b, c) { return a + b + c; },
+    dvA = new dv(1),
+    dvB = new dv(2),
+    dvC = 3;
+  throws(function () { var v = new dv(fn, [dvA, dvB, dvC], 122); },
+    Error, 'dv: when 2+ args, 2nd (array) should consist only of dynamic values! (element 2 is not a dv)');
+});
+
+test('wo/ keyword `new`', function() {
+  var fn = function (a, b, c) { return a + b + c; },
+    dvA = dv(1),
+    dvB = dv(2),
+    dvC = 3;
+  throws(function () { var v = dv(fn, [dvA, dvB, dvC], 221); },
+    Error, 'dv: when 2+ args, 2nd (array) should consist only of dynamic values! (element 2 is not a dv)');
+});
+
+
+module('Creating dv w/ value (3+ args: 1st — function, 2nd — array of dv, 3rd — initial value)');
+
+test('w/ keyword `new`', function() {
+  var fn = function (a, b, c) { return a + b + c; },
+    dvA = new dv(1),
+    dvB = new dv(2),
+    dvC = new dv(3),
+    v = new dv(fn, [dvA, dvB, dvC], 89);
+
+  ok(v instanceof dv);
+  ok(true, 'should not throw exceptions');
+  equal(v._value, 89, 'should contain correct calculation result in its value');
+});
+
+test('wo/ keyword `new`', function() {
+  var fn = function (a, b, c) { return a + b + c; },
+    dvA = dv(1),
+    dvB = dv(2),
+    dvC = dv(3),
+    v = dv(fn, [dvA, dvB, dvC], 78);
+
+  ok(v instanceof dv);
+  ok(true, 'should not throw exceptions');
+  equal(v._value, 78, 'should contain correct calculation result in its value');
+});
+
+
 
 module('.lift method');
 
@@ -166,14 +217,14 @@ test('should return correct dv lift constructor', function () {
 
   lift = dv.lift(liftFn);
 
-  ok(dv.callCount == 0);
+  equal(dv.callCount, 0);
 
   lifted = lift(dvA, dvB, dvC);
 
   ok(dv.calledOnce);
   ok(dv.calledWithNew());
   ok(dv.calledWith(liftFn, [ dvA, dvB, dvC ]));
-  ok(lifted._value == 6);
+  equal(lifted._value, 6);
 
   window.dv.restore();
 });
@@ -373,7 +424,7 @@ test('lift function should receive current value as context (this)', function ()
     dvB = dv(2),
     dvC = dv(3),
     values = [],
-    values2 = [],    
+    values2 = [],
     lifted = dv.lift(function (a, b, c) {
       values.push(this);
       return a + b + c;
