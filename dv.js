@@ -180,6 +180,82 @@ dv = (function () {
   };
 
 
+  dv.deferred = function deferred() {
+    if (arguments.callee !== this.constructor) {
+      return new arguments.callee();
+    }
+
+    var dd = this,
+      dvState = dv([ 'pending' ]);
+
+    dd.resolve = function () {
+      if (dd.state() !== 'pending') return;
+      dvState.value = [ 'resolved', null, Array.prototype.slice.apply(arguments) ];
+      return dd;
+    };
+
+    dd.resolveWith = function () {
+      if (dd.state() !== 'pending') return;
+      dvState.value = [ 'resolved', arguments[0], Array.prototype.slice.call(arguments, 1) ];
+      return dd;
+    };
+
+    dd.reject = function () {
+      if (dd.state() !== 'pending') return;
+      dvState.value = [ 'rejected', null, Array.prototype.slice.apply(arguments) ];
+      return dd;
+    };
+
+    dd.rejectWith = function () {
+      if (dd.state() !== 'pending') return;
+      dvState.value = [ 'rejected', arguments[0], Array.prototype.slice.call(arguments, 1) ];
+      return dd;
+    };
+
+    dd.state = function () {
+      return dvState.value[0];
+    };
+
+    dd.done = function (callback) {
+      dvState.onchange(function (state, prev) {
+        if (state[0] !== 'resolved') return;
+        callback.apply(dvState.value[1], dvState.value[2]);
+      });
+      return dd;
+    };
+
+    dd.fail = function (callback) {
+      dvState.onchange(function (state, prev) {
+        if (state[0] !== 'rejected') return;
+        callback.apply(dvState.value[1], dvState.value[2]);
+      });
+      return dd;
+    };
+
+    dd.always = function () {
+      dvState.onchange(function (state, prev) {
+        callback.apply(dvState.value[1], dvState.value[2]);
+      });
+      return dd;
+    };
+
+    dd.promise = function () {
+      return {
+        promise: dd.promise,
+        state: dd.state,
+        done: dd.done,
+        fail: dd.fail,
+        always: dd.always
+      };
+    };
+
+  }
+
+  dv.deferred.prototype.toString = function () {
+    return this.state();
+  };
+
+
   return dv;
 
 })();
