@@ -201,7 +201,7 @@ test('wo/ keyword `new`', function() {
 
 
 
-module('.lift method');
+module('dv.lift method');
 
 test('should return correct dv lift constructor', function () {
   var lift,
@@ -283,7 +283,7 @@ test('lift function should not calculate value when there is initial value provi
 
 
 
-module('#onchange method');
+module('dv#onchange method');
 
 test('should remember change handlers in the order they are registered', function() {
   var v = dv(3),
@@ -303,7 +303,7 @@ test('should remember change handlers in the order they are registered', functio
 
 
 
-module('#cleanup method');
+module('dv#cleanup method');
 
 test('should cleanup change handlers', function() {
   var v = dv(3),
@@ -324,7 +324,7 @@ test('should cleanup change handlers', function() {
 
 
 
-module('#link method');
+module('dv#link method');
 
 test('should shout unless given another dynamic value as single argument', function() {
   var v = dv(3);
@@ -369,7 +369,7 @@ test('should return self', function() {
 
 
 
-module('#unlink method');
+module('dv#unlink method');
 
 test('should unlink from other dv, but still hold its value', function() {
   var v = dv(3),
@@ -409,7 +409,7 @@ test('should return self', function() {
 
 
 
-module('#value getter');
+module('dv#value getter');
 
 test('should return correct value', function() {
   var v = dv(3);
@@ -419,7 +419,7 @@ test('should return correct value', function() {
 
 
 
-module('#value setter');
+module('dv#value setter');
 
 test('should set value correctly', function() {
   var v = dv(3);
@@ -517,7 +517,7 @@ test('lift function should receive current value as context (this)', function ()
 
 
 
-module('#map method');
+module('dv#map method');
 
 test('should return new dv lifted from self with function provided', function () {
   var dvStr = dv('abc'),

@@ -180,81 +180,147 @@ dv = (function () {
   };
 
 
-  dv.deferred = function deferred() {
-    if (arguments.callee !== this.constructor) {
-      return new arguments.callee();
-    }
-
-    var dd = this,
+  function deferred() {
+    var dd = {},
+      prom = {},
       dvState = dv([ 'pending' ]);
 
-    dd.resolve = function () {
-      if (dd.state() !== 'pending') return;
-      dvState.value = [ 'resolved', null, Array.prototype.slice.apply(arguments) ];
-      return dd;
+    function resolve() {
+      if (dd.state() === 'pending') {
+        dvState.value = [ 'resolved', null, Array.prototype.slice.apply(arguments) ];
+      }
+      return this;
     };
 
-    dd.resolveWith = function () {
-      if (dd.state() !== 'pending') return;
-      dvState.value = [ 'resolved', arguments[0], Array.prototype.slice.call(arguments, 1) ];
-      return dd;
+    function resolveWith() {
+      if (dd.state() === 'pending') {
+        dvState.value = [ 'resolved', arguments[0], Array.prototype.slice.call(arguments, 1) ];
+      }
+      return this;
     };
 
-    dd.reject = function () {
-      if (dd.state() !== 'pending') return;
-      dvState.value = [ 'rejected', null, Array.prototype.slice.apply(arguments) ];
-      return dd;
+    function reject() {
+      if (dd.state() === 'pending') {
+        dvState.value = [ 'rejected', null, Array.prototype.slice.apply(arguments) ];
+      }
+      return this;
     };
 
-    dd.rejectWith = function () {
-      if (dd.state() !== 'pending') return;
-      dvState.value = [ 'rejected', arguments[0], Array.prototype.slice.call(arguments, 1) ];
-      return dd;
+    function rejectWith() {
+      if (dd.state() === 'pending') {
+        dvState.value = [ 'rejected', arguments[0], Array.prototype.slice.call(arguments, 1) ];
+      }
+      return this;
     };
 
-    dd.state = function () {
+    function state() {
       return dvState.value[0];
     };
 
-    dd.done = function (callback) {
-      dvState.onchange(function (state, prev) {
-        if (state[0] !== 'resolved') return;
+    function done(callback) {
+      if (typeof callback !== 'function') return this;
+      if (dvState.value[0] === 'resolved') {
         callback.apply(dvState.value[1], dvState.value[2]);
-      });
-      return dd;
+      } else {
+        dvState.onchange(function (state, prev) {
+          if (state[0] !== 'resolved') return;
+          callback.apply(dvState.value[1], dvState.value[2]);
+        });
+      }
+      return this;
     };
 
-    dd.fail = function (callback) {
-      dvState.onchange(function (state, prev) {
-        if (state[0] !== 'rejected') return;
+    function fail(callback) {
+      if (typeof callback !== 'function') return this;
+      if (dvState.value[0] === 'rejected') {
         callback.apply(dvState.value[1], dvState.value[2]);
-      });
-      return dd;
+      } else {
+        dvState.onchange(function (state, prev) {
+          if (state[0] !== 'rejected') return;
+          callback.apply(dvState.value[1], dvState.value[2]);
+        });
+      }
+      return this;
     };
 
-    dd.always = function () {
-      dvState.onchange(function (state, prev) {
+    function always(callback) {
+      if (typeof callback !== 'function') return this;
+      if (dvState.value[0] === 'pending') {
+        dvState.onchange(function (state, prev) {
+          callback.apply(dvState.value[1], dvState.value[2]);
+        });
+      } else {
         callback.apply(dvState.value[1], dvState.value[2]);
-      });
-      return dd;
+      }
+      return this;
     };
 
-    dd.promise = function () {
-      return {
-        promise: dd.promise,
-        state: dd.state,
-        done: dd.done,
-        fail: dd.fail,
-        always: dd.always
-      };
+    function promise() {
+      return prom;
     };
 
+
+    prom.done = done;
+    prom.fail = fail;
+    prom.always = always;
+    prom.state = state;
+    prom.promise = promise;
+
+    dd.done = done;
+    dd.fail = fail;
+    dd.always = always;
+    dd.state = state;
+    dd.resolve = resolve;
+    dd.resolveWith = resolveWith;
+    dd.reject = reject;
+    dd.rejectWith = rejectWith;
+    dd.promise = promise;
+
+    return dd;
   }
 
-  dv.deferred.prototype.toString = function () {
-    return this.state();
-  };
 
+  // NOTE The implementation is absolute jQuery.when copy.
+  function when(subordinate) {
+    var i,
+      resolveValues = Arrray.prototype.slice.apply(arguments),
+      resolveContexts,
+      length = promises.length,
+      remaining = length != 1 || (subordinate && typeof subordinate.promise === 'function') ? length : 0,
+      deferred = remaining === 1 ? subordinate : dv.deferred(),
+      updateFunc = function (i, contexts, values) {
+        return function (value) {
+          contexts[i] = this;
+          values[i] = arguments.length > 1 ? slice.call(arguments) : value;
+          if (!(--remaining)) {
+            deferred.resolveWith(contexts, values);
+          }
+        };
+      };
+
+    if (length > 1) {
+      resolveContexts = new Array(length);
+      for (i = 0; i < length; i++) {
+        if (resolveValues[i] && typeof resovleValues.promise === 'function') {
+          resolveValues[i].promise()
+            .done(updateFunc(i, resolveContexts, resolveValues))
+            .fail(deferred.reject);
+        } else {
+          remaining -= 1;
+        }
+      }
+    }
+
+    if (!remaining) {
+      deferred.resolveWith(resolveContexts, resolveValues);
+    }
+
+    return deferred.promise();
+  }
+
+
+  dv.deferred = deferred;
+  dv.when = when;
 
   return dv;
 
