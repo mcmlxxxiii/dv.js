@@ -205,7 +205,7 @@ for (var i = 0; i < CONTEXTS.length; i++) {
            done(function () { resolved.push(args(arguments)); }).
            done(function () { resolved.push(args(arguments)); });
     deepEqual(resolved, []);
-    this.d.resolveWith(123, 4, 5, 6);
+    this.d.resolveWith(123, [4, 5, 6]);
     deepEqual(resolved, [ [4,5,6], [4,5,6], [4,5,6] ]);
   });
 
@@ -235,7 +235,7 @@ for (var i = 0; i < CONTEXTS.length; i++) {
            always(function () { resolved.push(args(arguments)); }).
            always(function () { resolved.push(args(arguments)); });
     deepEqual(resolved, []);
-    this.d.resolveWith(123, 4, 5, 6);
+    this.d.resolveWith(123, [4, 5, 6]);
     deepEqual(resolved, [ [4,5,6], [4,5,6], [4,5,6] ]);
   });
 
@@ -267,7 +267,7 @@ for (var i = 0; i < CONTEXTS.length; i++) {
            done(function ()   { resolved.push(args(arguments)); }).
            always(function () { resolved.push(args(arguments)); });
     deepEqual(resolved, []);
-    this.d.resolveWith(123, 4, 5, 6);
+    this.d.resolveWith(123, [4,5,6]);
     deepEqual(resolved, [ [4,5,6], [4,5,6], [4,5,6], [4,5,6] ]);
   });
 
@@ -428,13 +428,13 @@ for (var i = 0; i < CONTEXTS.length; i++) {
            fail(function () { rejected.push(args(arguments)); }).
            fail(function () { rejected.push(args(arguments)); });
     deepEqual(rejected, []);
-    this.d.rejectWith(123, 4, 5, 6);
+    this.d.rejectWith(123, [4,5,6]);
     deepEqual(rejected, [ [4,5,6], [4,5,6], [4,5,6] ]);
   });
 
   test('should trigger fail callbacks wo/ context', function() {
     var rejected = [];
-    this.d.fail(function () { rejected.push(123); }).
+    this.t.fail(function () { rejected.push(123); }).
            fail(function () { rejected.push(123); }).
            fail(function () { rejected.push(123); });
     deepEqual(rejected, []);
@@ -444,7 +444,7 @@ for (var i = 0; i < CONTEXTS.length; i++) {
 
   test('should trigger always callbacks in the order they were bound', function() {
     var rejected = [];
-    this.d.always(function () { rejected.push(1); }).
+    this.t.always(function () { rejected.push(1); }).
            always(function () { rejected.push(2); }).
            always(function () { rejected.push(3); });
     deepEqual(rejected, []);
@@ -454,11 +454,11 @@ for (var i = 0; i < CONTEXTS.length; i++) {
 
   test('should trigger always callbacks passing them received arguments', function() {
     var rejected = [];
-    this.d.always(function () { rejected.push(args(arguments)); }).
+    this.t.always(function () { rejected.push(args(arguments)); }).
            always(function () { rejected.push(args(arguments)); }).
            always(function () { rejected.push(args(arguments)); });
     deepEqual(rejected, []);
-    this.d.rejectWith(123, 4, 5, 6);
+    this.d.rejectWith(123, [4,5,6]);
     deepEqual(rejected, [ [4,5,6], [4,5,6], [4,5,6] ]);
   });
 
@@ -490,13 +490,13 @@ for (var i = 0; i < CONTEXTS.length; i++) {
            fail(function ()   { rejected.push(args(arguments)); }).
            always(function () { rejected.push(args(arguments)); });
     deepEqual(rejected, []);
-    this.d.rejectWith(123, 4, 5, 6);
+    this.d.rejectWith(123, [4,5,6]);
     deepEqual(rejected, [ [4,5,6], [4,5,6], [4,5,6], [4,5,6] ]);
   });
 
   test('should trigger both fail and always callbacks wo/ context', function() {
     var rejected = [];
-    this.d.fail(function ()   { 'use strict'; rejected.push(this); }).
+    this.t.fail(function ()   { 'use strict'; rejected.push(this); }).
            always(function () { 'use strict'; rejected.push(this); }).
            fail(function ()   { 'use strict'; rejected.push(this); }).
            always(function () { 'use strict'; rejected.push(this); });
@@ -507,7 +507,7 @@ for (var i = 0; i < CONTEXTS.length; i++) {
 
   test('should not trigger done callbacks', function () {
     var rejected = [];
-    this.d.done(function () { rejected.push(1); }).
+    this.t.done(function () { rejected.push(1); }).
            done(function () { rejected.push(2); }).
            done(function () { rejected.push(3); });
     deepEqual(rejected, []);
