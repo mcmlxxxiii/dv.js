@@ -7,8 +7,7 @@
  * Date: Sun Jul 6, 2014
  */
 
-
-var dv = (function () {
+dv = (function () {
 
   function dv(value) {
     var i, arr = [];
@@ -94,12 +93,13 @@ var dv = (function () {
     delete this._changeHandlers;
   };
 
-  dv.prototype.link = function (dvOther) {
+  dv.prototype.link = function (dvOther, initialValue) {
     if (!(dvOther instanceof dv) || this === dvOther)
       throw new Error('dv: #link only accepts other dv as single argument!');
     this._linkedTo = dvOther;
     if (!this._linkedTo._deps) { this._linkedTo._deps = []; }
     this._linkedTo._deps.push(this);
+    //this._value = arguments.length > 1 ? initialValue : this._linkedTo._value;
     this._value = this._linkedTo._value;
     return this;
   };
@@ -123,19 +123,27 @@ var dv = (function () {
   };
 
 
-  dv.prototype.__defineGetter__('value', function () {
+  dv.prototype.get = function () {
     return this._value;
-  });
+  };
 
-  dv.prototype.__defineSetter__('value', function (newValue) {
+  dv.prototype.set = function (newValue, forceFlag) {
+    forceFlag = !!forceFlag;
     var oldValue = this._value;
-    if (this._value !== newValue) {
+    if (forceFlag || this._value !== newValue) {
       this._value = newValue;
       this._triggerChange(newValue, oldValue);
       this._propagateChange();
     }
+  };
+
+  dv.prototype.__defineGetter__('value', function () {
+    return this.get();
   });
 
+  dv.prototype.__defineSetter__('value', function (newValue) {
+    this.set(newValue);
+  });
 
   dv.prototype._triggerChange = function (newValue, oldValue) {
     if (this._changeHandlers) {
@@ -180,6 +188,7 @@ var dv = (function () {
     }
   };
 
+
   return dv;
 
 })();
@@ -187,4 +196,3 @@ var dv = (function () {
 
 var u, module, cjs = module != u;
 (cjs ? module : window)[(cjs ? 'exports' : 'dv')] = dv;
-
