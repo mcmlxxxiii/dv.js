@@ -1,19 +1,19 @@
 var dv = require('../dv'),
-  dvFirst = dv(1),
-  dvSecond = dv(2);
+  a = dv(1),
+  b = dv(2);
 
-dvSecond.link(dvFirst);
-console.log(dvFirst.value, dvSecond.value);
+b.link(a);
+console.log(a.value, b.value);
 // 1 1
 
-dvFirst.value = 3;
-console.log(dvFirst.value, dvSecond.value);
+a.value = 3;
+console.log(a.value, b.value);
 // 3 3
 
-dvSecond.unlink();
-console.log(dvFirst.value, dvSecond.value);
+b.unlink();
+console.log(a.value, b.value);
 // 3 3
 
-dvFirst.value = 7;
-console.log(dvFirst.value, dvSecond.value);
+a.value = 7;
+console.log(a.value, b.value);
 // 7 3

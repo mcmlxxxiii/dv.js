@@ -1,24 +1,28 @@
+// $ node examples/example/dv.core.lift.js
+
 var dv = require('../dv'),
-  dvA = dv(10),
-  dvB = dv(20),
-  dvC = dv.lift(function (v1, v2) {
-    return v1 + v2;
-  })(dvA, dvB);
+  a = dv(10),
+  b = dv(20),
+  c = dv.lift(function (a, b) {
+    return a + b;
+  })(a, b);
 
-dvA.value = 10;
-dvB.value = 20;
 
-console.log(dvA.value, dvB.value, dvC.value);
+console.log(a.value, b.value, c.value);
 // 10 20 30
 
-dvA.value = 100;
-dvB.value = 30;
+a.value = 100;
+console.log(a.value, b.value, c.value);
+// 100 20 120
 
-console.log(dvA.value, dvB.value, dvC.value);
+b.value = 30;
+console.log(a.value, b.value, c.value);
 // 100 30 130
 
-dvA.value = 200;
-dvB.value = 60;
+a.value = 200;
+console.log(a.value, b.value, c.value);
+// 200 30 230
 
-console.log(dvA.value, dvB.value, dvC.value);
+b.value = 60;
+console.log(a.value, b.value, c.value);
 // 200 60 260
