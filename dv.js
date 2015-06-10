@@ -94,8 +94,10 @@ dv = (function () {
   };
 
   dv.prototype.link = function (dvOther, initialValue) {
-    if (!(dvOther instanceof dv) || this === dvOther)
-      throw new Error('dv: #link only accepts other dv as single argument!');
+    if (!(dvOther instanceof dv))
+      throw new Error('dv#link: accepts other dv as the single argument only!');
+    if (this === dvOther)
+      throw new Error('dv#link: cannot link to self!');
     this._linkedTo = dvOther;
     if (!this._linkedTo._deps) { this._linkedTo._deps = []; }
     this._linkedTo._deps.push(this);
@@ -174,7 +176,7 @@ dv = (function () {
   dv.prototype._calculateValue = function () {
     var newValue,
       oldValue;
-    if (this._linkedTo !== undefined && this._linkedTo !== this) {
+    if (this._linkedTo !== undefined) {
       newValue = this._linkedTo._value;
       oldValue = this._value;
     } else if (this._args instanceof Array && typeof this._fn === 'function') {

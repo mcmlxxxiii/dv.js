@@ -52,12 +52,12 @@ module('Creating dv w/ value (2 args: 1st — not a function, 2nd — an array)'
 
 test('w/ keyword `new`', function() {
   throws(function () { var v = new dv(1, []); },
-    Error, 'dv: when 2+ args, 1st should be function!');
+    new Error('dv: when 2+ args, 1st should be function!'));
 });
 
 test('wo/ keyword `new`', function() {
   throws(function () { var v = dv(1, []); },
-    Error, 'dv: when 2+ args, 1st should be function!');
+    new Error('dv: when 2+ args, 1st should be function!'));
 });
 
 
@@ -66,13 +66,13 @@ module('Creating dv w/ value (2 args: 1st — function, 2nd — not an array)');
 test('w/ keyword `new`', function() {
   var fn = function () {};
   throws(function () { var v = new dv(fn, 3); },
-    Error, 'dv: when 2+ args, 2nd should be array of dv!');
+    new Error('dv: when 2+ args, 2nd should be array of dv!'));
 });
 
 test('wo/ keyword `new`', function() {
   var fn = function () {};
   throws(function () { var v = new dv(fn, 3); },
-    Error, 'dv: when 2+ args, 2nd should be array of dv!');
+    new Error('dv: when 2+ args, 2nd should be array of dv!'));
 });
 
 
@@ -84,7 +84,7 @@ test('w/ keyword `new`', function() {
     dvB = new dv(2),
     dvC = 3;
   throws(function () { var v = new dv(fn, [dvA, dvB, dvC]); },
-    Error, 'dv: when 2+ args, 2nd (array) should consist only of dynamic values! (element 2 is not a dv)');
+    new Error('dv: when 2+ args, 2nd (array) should consist only of dynamic values! (element 2 is not a dv)'));
 });
 
 test('wo/ keyword `new`', function() {
@@ -93,7 +93,7 @@ test('wo/ keyword `new`', function() {
     dvB = dv(2),
     dvC = 3;
   throws(function () { var v = dv(fn, [dvA, dvB, dvC]); },
-    Error, 'dv: when 2+ args, 2nd (array) should consist only of dynamic values! (element 2 is not a dv)');
+    new Error('dv: when 2+ args, 2nd (array) should consist only of dynamic values! (element 2 is not a dv)'));
 });
 
 
@@ -128,12 +128,12 @@ module('Creating dv w/ value (2+ args: 1st — not a function, 2nd — an array,
 
 test('w/ keyword `new`', function() {
   throws(function () { var v = new dv(1, [], 2); },
-    Error, 'dv: when 2+ args, 1st should be function!');
+    new Error('dv: when 2+ args, 1st should be function!'));
 });
 
 test('wo/ keyword `new`', function() {
   throws(function () { var v = dv(1, [], 3); },
-    Error, 'dv: when 2+ args, 1st should be function!');
+    new Error('dv: when 2+ args, 1st should be function!'));
 });
 
 
@@ -142,13 +142,13 @@ module('Creating dv w/ value (3+ args: 1st — function, 2nd — not an array, 3
 test('w/ keyword `new`', function() {
   var fn = function () {};
   throws(function () { var v = new dv(fn, 3, 1); },
-    Error, 'dv: when 2+ args, 2nd should be array of dv!');
+    new Error('dv: when 2+ args, 2nd should be array of dv!'));
 });
 
 test('wo/ keyword `new`', function() {
   var fn = function () {};
   throws(function () { var v = new dv(fn, 3, 2); },
-    Error, 'dv: when 2+ args, 2nd should be array of dv!');
+    new Error('dv: when 2+ args, 2nd should be array of dv!'));
 });
 
 
@@ -160,7 +160,7 @@ test('w/ keyword `new`', function() {
     dvB = new dv(2),
     dvC = 3;
   throws(function () { var v = new dv(fn, [dvA, dvB, dvC], 122); },
-    Error, 'dv: when 2+ args, 2nd (array) should consist only of dynamic values! (element 2 is not a dv)');
+    new Error('dv: when 2+ args, 2nd (array) should consist only of dynamic values! (element 2 is not a dv)'));
 });
 
 test('wo/ keyword `new`', function() {
@@ -169,7 +169,7 @@ test('wo/ keyword `new`', function() {
     dvB = dv(2),
     dvC = 3;
   throws(function () { var v = dv(fn, [dvA, dvB, dvC], 221); },
-    Error, 'dv: when 2+ args, 2nd (array) should consist only of dynamic values! (element 2 is not a dv)');
+    new Error('dv: when 2+ args, 2nd (array) should consist only of dynamic values! (element 2 is not a dv)'));
 });
 
 
@@ -329,9 +329,9 @@ module('dv#link method');
 test('should shout unless given another dynamic value as single argument', function() {
   var v = dv(3);
   throws(function () { v.link(1); },
-    Error, 'dv: #link only accepts other dv as single argument!');
+    new Error('dv#link: accepts other dv as the single argument only!'));
   throws(function () { v.link(v); },
-    Error, 'dv: #link only accepts other dv as single argument!');
+    new Error('dv#link: cannot link to self!'));
 });
 
 test('should not shout when given another dynamic value as single argument', function() {
