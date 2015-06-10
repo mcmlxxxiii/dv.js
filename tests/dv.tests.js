@@ -388,6 +388,28 @@ test('should unlink from other dv, but still hold its value', function() {
   ok(v2._value == 4);
 });
 
+test('should unlink from other dv not affecting other linked ones', function() {
+  var v = dv(1),
+    v2 = dv(2),
+    v3 = dv(3),
+    v4 = dv(4);
+
+  v2.link(v);
+  v3.link(v);
+  v4.link(v);
+
+  deepEqual(v._deps, [ v2, v3, v4 ]);
+  
+  v2.unlink()
+  deepEqual(v._deps, [ v3, v4 ]);
+  
+  v4.unlink()
+  deepEqual(v._deps, [ v3 ]);
+  
+  v3.unlink()
+  deepEqual(v._deps, undefined);
+});
+
 test('should do nothing if not linked', function() {
   var v = dv(3);
   v.unlink()

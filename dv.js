@@ -108,7 +108,10 @@ dv = (function () {
 
   dv.prototype.unlink = function () {
     if (this._linkedTo === undefined) return;
-    this._linkedTo._deps.splice(this._linkedTo._deps.indexOf(this), 1);
+    var i = this._linkedTo._deps.indexOf(this);
+    if (i !== -1) {
+      this._linkedTo._deps.splice(i, 1);
+    }
     if (this._linkedTo._deps.length === 0) {
       delete this._linkedTo._deps;
     }
