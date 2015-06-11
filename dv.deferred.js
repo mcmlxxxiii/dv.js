@@ -27,30 +27,34 @@ var deferred = (function (dv) {
 
     function resolve() {
       if (dd.state() === 'pending') {
-        dvState.value = [ 'resolved', null, Array.prototype.slice.apply(arguments) ];
+        dvState.value = [ 'resolved', null, Array.prototype.slice.call(arguments) ];
       }
       return this;
     };
 
     function resolveWith() {
       if (dd.state() === 'pending') {
-        var args = arguments[1];
-        dvState.value = [ 'resolved', arguments[0], args instanceof Array ? args : [ args ] ];
+        var args = Array.prototype.slice.call(arguments),
+          context = args.shift();
+        args = args[0] instanceof Array && args.length === 1 ? args[0] : args;
+        dvState.value = [ 'resolved', context, args ];
       }
       return this;
     };
 
     function reject() {
       if (dd.state() === 'pending') {
-        dvState.value = [ 'rejected', null, Array.prototype.slice.apply(arguments) ];
+        dvState.value = [ 'rejected', null, Array.prototype.slice.call(arguments) ];
       }
       return this;
     };
 
     function rejectWith() {
       if (dd.state() === 'pending') {
-        var args = arguments[1];
-        dvState.value = [ 'rejected', arguments[0], args instanceof Array ? args : [ args ] ];
+        var args = Array.prototype.slice.call(arguments),
+          context = args.shift();
+        args = args[0] instanceof Array && args.length === 1 ? args[0] : args;
+        dvState.value = [ 'rejected', context, args ];
       }
       return this;
     };
