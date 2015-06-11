@@ -20,7 +20,7 @@ dv = (function () {
     this._fn;
     this._args;
     this._deps; // = [];
-    this._changeHandler;
+    this._changeHandlers;
     this._linkedTo;
 
     if (arguments.length > 1) {

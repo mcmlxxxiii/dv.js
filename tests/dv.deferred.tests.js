@@ -209,14 +209,14 @@ for (var i = 0; i < CONTEXTS.length; i++) {
     deepEqual(resolved, [ [4,5,6], [4,5,6], [4,5,6] ]);
   });
 
-  test('should trigger done callbacks wo/ context', function() {
+  test('should trigger done callbacks w/ context provided', function() {
     var resolved = [];
-    this.t.done(function () { resolved.push(123); }).
-           done(function () { resolved.push(123); }).
-           done(function () { resolved.push(123); });
+    this.t.done(function () { resolved.push(this); }).
+           done(function () { resolved.push(this); }).
+           done(function () { resolved.push(this); });
     deepEqual(resolved, []);
-    this.d.resolveWith(123);
-    deepEqual(resolved, [ 123, 123, 123 ]);
+    this.d.resolveWith(1);
+    deepEqual(resolved, [ 1, 1, 1 ]);
   });
 
   test('should trigger always callbacks in the order they were bound', function() {
@@ -239,14 +239,14 @@ for (var i = 0; i < CONTEXTS.length; i++) {
     deepEqual(resolved, [ [4,5,6], [4,5,6], [4,5,6] ]);
   });
 
-  test('should trigger always callbacks wo/ context', function() {
+  test('should trigger always callbacks w/ context provided', function() {
     var resolved = [];
     this.t.always(function () { 'use strict'; resolved.push(this); }).
            always(function () { 'use strict'; resolved.push(this); }).
            always(function () { 'use strict'; resolved.push(this); });
     deepEqual(resolved, []);
-    this.d.resolveWith(456);
-    deepEqual(resolved, [ 456, 456, 456 ]);
+    this.d.resolveWith(2);
+    deepEqual(resolved, [ 2, 2, 2 ]);
   });
 
   test('should trigger both done and always callbacks in the order they were bound', function() {
@@ -254,7 +254,7 @@ for (var i = 0; i < CONTEXTS.length; i++) {
     this.t.done(function ()   { resolved.push(1); }).
            always(function () { resolved.push(2); }).
            done(function ()   { resolved.push(3); }).
-      always(function () { resolved.push(4); });
+           always(function () { resolved.push(4); });
     deepEqual(resolved, []);
     this.d.resolveWith(123);
     deepEqual(resolved, [ 1, 2, 3, 4 ]);
@@ -271,15 +271,15 @@ for (var i = 0; i < CONTEXTS.length; i++) {
     deepEqual(resolved, [ [4,5,6], [4,5,6], [4,5,6], [4,5,6] ]);
   });
 
-  test('should trigger both done and always callbacks wo/ context', function() {
+  test('should trigger both done and always callbacks w/ context provided', function() {
     var resolved = [];
     this.t.done(function ()   { 'use strict'; resolved.push(this); }).
            always(function () { 'use strict'; resolved.push(this); }).
            done(function ()   { 'use strict'; resolved.push(this); }).
            always(function () { 'use strict'; resolved.push(this); });
     deepEqual(resolved, []);
-    this.d.resolveWith(567);
-    deepEqual(resolved, [ 567, 567, 567, 567 ]);
+    this.d.resolveWith(3);
+    deepEqual(resolved, [ 3, 3, 3, 3 ]);
   });
 
   test('should not trigger fail callbacks', function () {
@@ -432,14 +432,14 @@ for (var i = 0; i < CONTEXTS.length; i++) {
     deepEqual(rejected, [ [4,5,6], [4,5,6], [4,5,6] ]);
   });
 
-  test('should trigger fail callbacks wo/ context', function() {
+  test('should trigger fail callbacks w/ context provided', function() {
     var rejected = [];
-    this.t.fail(function () { rejected.push(123); }).
-           fail(function () { rejected.push(123); }).
-           fail(function () { rejected.push(123); });
+    this.t.fail(function () { rejected.push(this); }).
+           fail(function () { rejected.push(this); }).
+           fail(function () { rejected.push(this); });
     deepEqual(rejected, []);
-    this.d.rejectWith(123);
-    deepEqual(rejected, [ 123, 123, 123 ]);
+    this.d.rejectWith(10);
+    deepEqual(rejected, [ 10, 10, 10 ]);
   });
 
   test('should trigger always callbacks in the order they were bound', function() {
@@ -462,14 +462,14 @@ for (var i = 0; i < CONTEXTS.length; i++) {
     deepEqual(rejected, [ [4,5,6], [4,5,6], [4,5,6] ]);
   });
 
-  test('should trigger always callbacks wo/ context', function() {
+  test('should trigger always callbacks w/ context provided', function() {
     var rejected = [];
     this.t.always(function () { 'use strict'; rejected.push(this); }).
            always(function () { 'use strict'; rejected.push(this); }).
            always(function () { 'use strict'; rejected.push(this); });
     deepEqual(rejected, []);
-    this.d.rejectWith(456);
-    deepEqual(rejected, [ 456, 456, 456 ]);
+    this.d.rejectWith(11);
+    deepEqual(rejected, [ 11, 11, 11 ]);
   });
 
   test('should trigger both fail and always callbacks in the order they were bound', function() {
@@ -501,8 +501,8 @@ for (var i = 0; i < CONTEXTS.length; i++) {
            fail(function ()   { 'use strict'; rejected.push(this); }).
            always(function () { 'use strict'; rejected.push(this); });
     deepEqual(rejected, []);
-    this.d.rejectWith(567);
-    deepEqual(rejected, [ 567, 567, 567, 567 ]);
+    this.d.rejectWith(12);
+    deepEqual(rejected, [ 12, 12, 12, 12 ]);
   });
 
   test('should not trigger done callbacks', function () {
@@ -585,11 +585,6 @@ for (var i = 0; i < CONTEXTS.length; i++) {
       ok(this.t.state() === 'pending');
       this.t[callback](function () {});
       ok(this.t.state() === 'pending');
-
-      this.d.resolve();
-      ok(this.t.state() === 'resolved');
-      this.t[callback](function () {});
-      ok(this.t.state() === 'resolved');
     });
 
     test('should not throw errors', function() {
@@ -602,8 +597,10 @@ for (var i = 0; i < CONTEXTS.length; i++) {
         var ret = this.t[callback]();
         if (context === 'DEFERRED') {
           ok(objSize(ret) == 9);
+          ok(ret === this.d);
         } else {
           ok(objSize(ret) == 5);
+          ok(ret === this.t);
         }
       }
     })(context));
