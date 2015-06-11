@@ -142,12 +142,13 @@ dv = (function () {
     }
   };
 
-  dv.prototype.__defineGetter__('value', function () {
-    return this.get();
-  });
-
-  dv.prototype.__defineSetter__('value', function (newValue) {
-    this.set(newValue);
+  Object.defineProperty(dv.prototype, 'value', {
+    get: function () {
+      return this.get();
+    },
+    set: function (newValue) {
+      this.set(newValue);
+    }
   });
 
   dv.prototype._triggerChange = function (newValue, oldValue) {
