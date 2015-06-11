@@ -50,7 +50,7 @@ for (var i = 0; i < CONTEXTS.length; i++) {
 
 
 
-  module('dv.deferred#promise ' + context, { setup: setup });
+  module(context + ' dv.deferred#promise', { setup: setup });
 
   test('should return correct promise object', function() {
     var p = this.t.promise();
@@ -70,7 +70,7 @@ for (var i = 0; i < CONTEXTS.length; i++) {
 
 
 
-  module('dv.deferred#resolve ' + context, { setup: setup });
+  module(context + ' dv.deferred#resolve', { setup: setup });
 
   test('should make state resolved', function() {
     this.d.resolve();
@@ -182,7 +182,7 @@ for (var i = 0; i < CONTEXTS.length; i++) {
 
 
 
-  module('dv.deferred#resolveWith ' + context, { setup: setup });
+  module(context + ' dv.deferred#resolveWith', { setup: setup });
 
   test('should make state resolved', function() {
     this.d.resolveWith(123);
@@ -294,7 +294,7 @@ for (var i = 0; i < CONTEXTS.length; i++) {
 
 
 
-  module('dv.deferred#reject ' + context, { setup: setup });
+  module(context + ' dv.deferred#reject', { setup: setup });
 
   test('should make state rejected', function() {
     this.d.reject();
@@ -405,7 +405,7 @@ for (var i = 0; i < CONTEXTS.length; i++) {
 
 
 
-  module('dv.deferred#rejectWith ' + context, { setup: setup });
+  module(context + ' dv.deferred#rejectWith', { setup: setup });
 
   test('should make state rejected', function() {
     this.d.rejectWith(123);
@@ -517,7 +517,7 @@ for (var i = 0; i < CONTEXTS.length; i++) {
 
 
 
-  module('dv.deferred#state ' + context, { setup: setup });
+  module(context + ' dv.deferred#state', { setup: setup });
 
   test('should be `pending` right after creation', function() {
     ok(this.t.state() === 'pending');
@@ -528,12 +528,30 @@ for (var i = 0; i < CONTEXTS.length; i++) {
     ok(this.t.state() === 'resolved');
   });
 
+  test('should stay `resolved` after subsequent resolve calls', function() {
+    this.d.resolve();
+    ok(this.t.state() === 'resolved');
+    this.d.resolve();
+    ok(this.t.state() === 'resolved');
+    this.d.resolve();
+    ok(this.t.state() === 'resolved');
+  });
+
   test('should be `resolved` after resolveWith call', function() {
     this.d.resolveWith(123);
     ok(this.t.state() === 'resolved');
   });
 
   test('should be `rejected` after reject call', function() {
+    this.d.reject();
+    ok(this.t.state() === 'rejected');
+  });
+
+  test('should stay `rejected` after subsequent reject calls', function() {
+    this.d.reject();
+    ok(this.t.state() === 'rejected');
+    this.d.reject();
+    ok(this.t.state() === 'rejected');
     this.d.reject();
     ok(this.t.state() === 'rejected');
   });
@@ -576,34 +594,212 @@ for (var i = 0; i < CONTEXTS.length; i++) {
   });
 
 
-  for (var j = 0; j < CALLBACKS.length; j++) {
-    var callback = CALLBACKS[j];
+  module(context + ' dv.deferred#done', { setup: setup });
 
-    module('dv.deferred#' + callback + ' ' + context, { setup: setup });
+  test('should not change state of a new deferred', function() {
+    ok(this.t.state() === 'pending');
+    this.t.done(function () {});
+    ok(this.t.state() === 'pending');
+  });
 
-    test('should not change state', function() {
-      ok(this.t.state() === 'pending');
-      this.t[callback](function () {});
-      ok(this.t.state() === 'pending');
-    });
+  test('should not change state of a resolved deferred', function() {
+    this.d.resolve();
+    ok(this.t.state() === 'resolved');
+    this.t.done(function () {});
+    ok(this.t.state() === 'resolved');
+  });
 
-    test('should not throw errors', function() {
-      this.t[callback]();
-      ok(true);
-    });
+  test('should not change state of a rejected deferred', function() {
+    this.d.reject();
+    ok(this.t.state() === 'rejected');
+    this.t.done(function () {});
+    ok(this.t.state() === 'rejected');
+  });
 
-    test('should return correct self', (function(context) {
-      return function () {
-        var ret = this.t[callback]();
-        if (context === 'DEFERRED') {
-          ok(objSize(ret) == 9);
-          ok(ret === this.d);
-        } else {
-          ok(objSize(ret) == 5);
-          ok(ret === this.t);
-        }
+  test('should trigger done callback immediately with arguments and context the deferred was previously resolved', function() {
+    var argz, context;
+    this.d.resolveWith(123, [ 1, 2, 3 ]);
+    ok(context === undefined);
+    ok(argz === undefined);
+    this.t.done(function () { context = this; argz = args(arguments); });
+    ok(context == 123);
+    deepEqual(argz, [ 1, 2, 3 ]);
+  });
+
+  test('should never trigger fail callback', function() {
+    var failTriggered = false;
+    this.t.fail(function () { failTriggered = true; });
+    this.t.done(function () {});
+    ok(!failTriggered);
+    this.d.resolve();
+    ok(!failTriggered);
+    this.t.done(function () {});
+    ok(!failTriggered);
+  });
+
+  test('should not throw errors', function() {
+    this.t.done();
+    ok(true);
+    this.d.resolve();
+    this.t.done();
+    ok(true);
+  });
+
+  test('should return correct self', (function(context) {
+    return function () {
+      var ret = this.t.done();
+      if (context === 'DEFERRED') {
+        ok(objSize(ret) == 9);
+        ok(ret === this.d);
+      } else {
+        ok(objSize(ret) == 5);
+        ok(ret === this.t);
       }
-    })(context));
+    }
+  })(context));
 
-  }
+
+  module(context + ' dv.deferred#fail', { setup: setup });
+
+  test('should not change state of a new deferred', function() {
+    ok(this.t.state() === 'pending');
+    this.t.fail(function () {});
+    ok(this.t.state() === 'pending');
+  });
+
+  test('should not change state of a resolved deferred', function() {
+    this.d.resolve();
+    ok(this.t.state() === 'resolved');
+    this.t.fail(function () {});
+    ok(this.t.state() === 'resolved');
+  });
+
+  test('should not change state of a rejected deferred', function() {
+    this.d.reject();
+    ok(this.t.state() === 'rejected');
+    this.t.fail(function () {});
+    ok(this.t.state() === 'rejected');
+  });
+
+  test('should trigger fail callback immediately with arguments and context the deferred was previously rejected', function() {
+    var argz, context;
+    this.d.rejectWith(123, [ 1, 2, 3 ]);
+    ok(context === undefined);
+    ok(argz === undefined);
+    this.t.fail(function () { context = this; argz = args(arguments); });
+    ok(context == 123);
+    deepEqual(argz, [ 1, 2, 3 ]);
+  });
+
+  test('should never trigger done callback', function() {
+    var doneTriggered = false;
+    this.t.done(function () { doneTriggered = true; });
+    this.t.fail(function () {});
+    ok(!doneTriggered);
+    this.d.reject();
+    ok(!doneTriggered);
+    this.t.fail(function () {});
+    ok(!doneTriggered);
+  });
+
+  test('should not throw errors', function() {
+    this.t.fail();
+    ok(true);
+    this.d.resolve();
+    this.t.fail();
+    ok(true);
+  });
+
+  test('should return correct self', (function(context) {
+    return function () {
+      var ret = this.t.fail();
+      if (context === 'DEFERRED') {
+        ok(objSize(ret) == 9);
+        ok(ret === this.d);
+      } else {
+        ok(objSize(ret) == 5);
+        ok(ret === this.t);
+      }
+    }
+  })(context));
+
+
+  module(context + ' dv.deferred#always', { setup: setup });
+
+  test('should not change state of a new deferred', function() {
+    ok(this.t.state() === 'pending');
+    this.t.always(function () {});
+    ok(this.t.state() === 'pending');
+  });
+
+  test('should not change state of a resolved deferred', function() {
+    this.d.resolve();
+    ok(this.t.state() === 'resolved');
+    this.t.always(function () {});
+    ok(this.t.state() === 'resolved');
+  });
+
+  test('should not change state of a rejected deferred', function() {
+    this.d.reject();
+    ok(this.t.state() === 'rejected');
+    this.t.always(function () {});
+    ok(this.t.state() === 'rejected');
+  });
+
+  test('should trigger always callback immediately if deferred is already resolved', function() {
+    var alwaysTriggered = false;
+    this.d.resolve();
+    this.t.always(function () { alwaysTriggered = true; });
+    ok(alwaysTriggered);
+  });
+
+  test('should trigger always callback immediately if deferred is already rejected', function() {
+    var alwaysTriggered = false;
+    this.d.reject();
+    this.t.always(function () { alwaysTriggered = true; });
+    ok(alwaysTriggered);
+  });
+
+  test('should never trigger done callback', function() {
+    var doneTriggered = false;
+    this.t.done(function () { doneTriggered = true; });
+    this.t.always(function () {});
+    ok(!doneTriggered);
+    this.d.reject();
+    ok(!doneTriggered);
+    this.t.always(function () {});
+    ok(!doneTriggered);
+  });
+
+  test('should never trigger fail callback', function() {
+    var failTriggered = false;
+    this.t.fail(function () { failTriggered = true; });
+    this.t.always(function () {});
+    ok(!failTriggered);
+    this.d.resolve();
+    ok(!failTriggered);
+    this.t.always(function () {});
+    ok(!failTriggered);
+  });
+
+  test('should not throw errors', function() {
+    this.t.always();
+    ok(true);
+    this.d.resolve();
+    this.t.always();
+    ok(true);
+  });
+
+  test('should return correct self', (function(context) {
+    return function () {
+      var ret = this.t.always();
+      if (context === 'DEFERRED') {
+        ok(objSize(ret) == 9);
+        ok(ret === this.d);
+      } else {
+        ok(objSize(ret) == 5);
+        ok(ret === this.t);
+      }
+    }
+  })(context));
 }
