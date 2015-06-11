@@ -20,41 +20,53 @@ if (cjs) {
 
 var deferred = (function (dv) {
 
+  function slice(obj) {
+    return Array.prototype.slice.call(obj);
+  }
+
+
+  var State = {
+    PENDING: 'pending',
+    RESOLVED: 'resolved',
+    REJECTED: 'rejected'
+  };
+
+
   function deferred() {
     var dd = {},
-      prom = {},
-      dvState = dv([ 'pending' ]);
+      ps = {},
+      dvState = dv([ State.PENDING ]);
 
     function resolve() {
-      if (dd.state() === 'pending') {
-        dvState.value = [ 'resolved', null, Array.prototype.slice.call(arguments) ];
+      if (dd.state() === State.PENDING) {
+        dvState.value = [ State.RESOLVED, null, slice(arguments) ];
       }
       return this;
     };
 
     function resolveWith() {
-      if (dd.state() === 'pending') {
-        var args = Array.prototype.slice.call(arguments),
+      if (dd.state() === State.PENDING) {
+        var args = slice(arguments),
           context = args.shift();
         args = args[0] instanceof Array && args.length === 1 ? args[0] : args;
-        dvState.value = [ 'resolved', context, args ];
+        dvState.value = [ State.RESOLVED, context, args ];
       }
       return this;
     };
 
     function reject() {
-      if (dd.state() === 'pending') {
-        dvState.value = [ 'rejected', null, Array.prototype.slice.call(arguments) ];
+      if (dd.state() === State.PENDING) {
+        dvState.value = [ State.REJECTED, null, slice(arguments) ];
       }
       return this;
     };
 
     function rejectWith() {
-      if (dd.state() === 'pending') {
-        var args = Array.prototype.slice.call(arguments),
+      if (dd.state() === State.PENDING) {
+        var args = slice(arguments),
           context = args.shift();
         args = args[0] instanceof Array && args.length === 1 ? args[0] : args;
-        dvState.value = [ 'rejected', context, args ];
+        dvState.value = [ State.REJECTED, context, args ];
       }
       return this;
     };
@@ -65,11 +77,11 @@ var deferred = (function (dv) {
 
     function done(callback) {
       if (typeof callback !== 'function') return this;
-      if (dvState.value[0] === 'resolved') {
+      if (dvState.value[0] === State.RESOLVED) {
         callback.apply(dvState.value[1], dvState.value[2]);
       } else {
         dvState.onchange(function (state, prev) {
-          if (state[0] !== 'resolved') return;
+          if (state[0] !== State.RESOLVED) return;
           callback.apply(dvState.value[1], dvState.value[2]);
         });
       }
@@ -78,11 +90,11 @@ var deferred = (function (dv) {
 
     function fail(callback) {
       if (typeof callback !== 'function') return this;
-      if (dvState.value[0] === 'rejected') {
+      if (dvState.value[0] === State.REJECTED) {
         callback.apply(dvState.value[1], dvState.value[2]);
       } else {
         dvState.onchange(function (state, prev) {
-          if (state[0] !== 'rejected') return;
+          if (state[0] !== State.REJECTED) return;
           callback.apply(dvState.value[1], dvState.value[2]);
         });
       }
@@ -91,7 +103,7 @@ var deferred = (function (dv) {
 
     function always(callback) {
       if (typeof callback !== 'function') return this;
-      if (dvState.value[0] === 'pending') {
+      if (dvState.value[0] === State.PENDING) {
         dvState.onchange(function (state, prev) {
           callback.apply(dvState.value[1], dvState.value[2]);
         });
@@ -102,15 +114,15 @@ var deferred = (function (dv) {
     };
 
     function promise() {
-      return prom;
+      return ps;
     };
 
 
-    prom.done = done;
-    prom.fail = fail;
-    prom.always = always;
-    prom.state = state;
-    prom.promise = promise;
+    ps.done = done;
+    ps.fail = fail;
+    ps.always = always;
+    ps.state = state;
+    ps.promise = promise;
 
     dd.done = done;
     dd.fail = fail;
@@ -133,14 +145,14 @@ var deferred = (function (dv) {
    */
   function when(subordinate /* , ..., subordinateN */) {
     var i,
-      resolveValues = Array.prototype.slice.apply(arguments),
+      resolveValues = slice(arguments),
       length = resolveValues.length,
       remaining = length != 1 || (subordinate && typeof subordinate.promise === 'function') ? length : 0,
       dfrrd = remaining === 1 ? subordinate : deferred(),
       updateFunc = function (i, contexts, values) {
         return function (value) {
           contexts[i] = this;
-          values[i] = arguments.length > 1 ? Array.prototype.slice.call(arguments) : value;
+          values[i] = arguments.length > 1 ? slice(arguments) : value;
           if (!(--remaining)) {
             dfrrd.resolveWith(contexts, values);
           }
@@ -182,4 +194,3 @@ if (!cjs) {
 
 
 (cjs ? module : window)[(cjs ? 'exports' : 'deferred')] = deferred;
-
