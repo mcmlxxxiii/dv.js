@@ -24,6 +24,17 @@ var deferred = (function (dv) {
     return Array.prototype.slice.call(obj);
   }
 
+  function flatten(ary) {
+    var newAry = [];
+    for (var i = 0; i < ary.length; i++) {
+      if (ary[i] instanceof Array) {
+        newAry = newAry.concat(flatten(ary[i]));
+      } else {
+        newAry.push(ary[i]);
+      }
+    }
+    return newAry;
+  }
 
   var State = {
     PENDING: 'pending',
@@ -75,40 +86,58 @@ var deferred = (function (dv) {
       return dvState.value[0];
     };
 
-    function done(callback) {
-      if (typeof callback !== 'function') return this;
-      if (dvState.value[0] === State.RESOLVED) {
-        callback.apply(dvState.value[1], dvState.value[2]);
-      } else {
-        dvState.onchange(function (state, prev) {
-          if (state[0] !== State.RESOLVED) return;
-          callback.apply(dvState.value[1], dvState.value[2]);
-        });
+    function done() {
+      var callbacks = flatten(arguments);
+      for (var i = 0; i < callbacks.length; i++) {
+        var one = callbacks[i];
+        if (typeof one !== 'function') continue;
+        if (dvState.value[0] === State.RESOLVED) {
+          one.apply(dvState.value[1], dvState.value[2]);
+        } else {
+          dvState.onchange((function (cb) {
+            return function (state, prev) {
+              if (state[0] !== State.RESOLVED) return;
+              cb.apply(dvState.value[1], dvState.value[2]);
+            };
+          })(one));
+        }
       }
       return this;
     };
 
     function fail(callback) {
-      if (typeof callback !== 'function') return this;
-      if (dvState.value[0] === State.REJECTED) {
-        callback.apply(dvState.value[1], dvState.value[2]);
-      } else {
-        dvState.onchange(function (state, prev) {
-          if (state[0] !== State.REJECTED) return;
-          callback.apply(dvState.value[1], dvState.value[2]);
-        });
+      var callbacks = flatten(arguments);
+      for (var i = 0; i < callbacks.length; i++) {
+        var one = callbacks[i];
+        if (typeof one !== 'function') continue;
+        if (dvState.value[0] === State.REJECTED) {
+          one.apply(dvState.value[1], dvState.value[2]);
+        } else {
+          dvState.onchange((function (cb) {
+            return function (state, prev) {
+              if (state[0] !== State.REJECTED) return;
+              cb.apply(dvState.value[1], dvState.value[2]);
+            };
+          })(one));
+        }
       }
       return this;
     };
 
     function always(callback) {
-      if (typeof callback !== 'function') return this;
-      if (dvState.value[0] === State.PENDING) {
-        dvState.onchange(function (state, prev) {
-          callback.apply(dvState.value[1], dvState.value[2]);
-        });
-      } else {
-        callback.apply(dvState.value[1], dvState.value[2]);
+      var callbacks = flatten(arguments);
+      for (var i = 0; i < callbacks.length; i++) {
+        var one = callbacks[i];
+        if (typeof one !== 'function') continue;
+        if (dvState.value[0] === State.PENDING) {
+          dvState.onchange((function (cb) {
+            return function (state, prev) {
+              cb.apply(dvState.value[1], dvState.value[2]);
+            };
+          })(one));
+        } else {
+          one.apply(dvState.value[1], dvState.value[2]);
+        }
       }
       return this;
     };

@@ -32,7 +32,6 @@ test('should have correct public methods', function() {
 
 
 var CONTEXTS = [ 'DEFERRED', 'PROMISE' ];
-var CALLBACKS = ['done', 'fail', 'always'];
 
 for (var i = 0; i < CONTEXTS.length; i++) {
 
@@ -656,6 +655,42 @@ for (var i = 0; i < CONTEXTS.length; i++) {
     ok(this.t.state() === 'rejected');
   });
 
+  test('should bind done callbacks provided in any argument, respecting their order, be it an array of functions, or a function', function () {
+    var resolved = [];
+    var cb = [];
+    for (var i = 0; i < 10; i++) {
+      cb.push((function (i) {
+        return function () { resolved.push(i); };
+      })(i));
+    }
+    this.t.done(cb[0],
+                [cb[1], cb[2]],
+                [cb[3],[cb[4], cb[5], cb[6]], cb[7], cb[8]],
+                cb[9]);
+    this.d.resolve();
+    deepEqual(resolved, [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]);
+  });
+
+  test('should not explode if provided an invalid argument', function () {
+   this.t.done(1, 'foo', NaN, Infinity, undefined);
+   this.t.done(null);
+   this.t.done([]);
+   this.t.done({});
+   this.t.done(/re/);
+   ok(true);
+  });
+
+  test('invalid arguments should be ignored and should not affect callback executions', function () {
+   var resolved = [];
+   this.t.done(function () { resolved.push(args(arguments)); });
+   this.t.done(Infinity);
+   this.t.done([]);
+   this.t.done({});
+   this.t.done(function () { resolved.push(args(arguments)); });
+   this.d.resolve(1, 2);
+   deepEqual(resolved, [ [1,2], [1,2] ]);
+  });
+
   test('should trigger done callback immediately with arguments and context the deferred was previously resolved', function() {
     var argz, context;
     this.d.resolveWith(123, [ 1, 2, 3 ]);
@@ -721,6 +756,31 @@ for (var i = 0; i < CONTEXTS.length; i++) {
     ok(this.t.state() === 'rejected');
   });
 
+  test('should bind fail callbacks provided in any argument, respecting their order, be it an array of functions, or a function', function () {
+    var rejected = [];
+    var cb = [];
+    for (var i = 0; i < 10; i++) {
+      cb.push((function (i) {
+        return function () { rejected.push(i); };
+      })(i));
+    }
+    this.t.fail(cb[0],
+                [cb[1], cb[2]],
+                [cb[3],[cb[4], cb[5], cb[6]], cb[7], cb[8]],
+                cb[9]);
+    this.d.reject();
+    deepEqual(rejected, [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]);
+  });
+
+  test('should not explode if provided an invalid argument', function () {
+   this.t.fail(1, 'foo', NaN, Infinity, undefined);
+   this.t.fail(null);
+   this.t.fail([]);
+   this.t.fail({});
+   this.t.fail(/re/);
+   ok(true);
+  });
+
   test('should trigger fail callback immediately with arguments and context the deferred was previously rejected', function() {
     var argz, context;
     this.d.rejectWith(123, [ 1, 2, 3 ]);
@@ -784,6 +844,31 @@ for (var i = 0; i < CONTEXTS.length; i++) {
     ok(this.t.state() === 'rejected');
     this.t.always(function () {});
     ok(this.t.state() === 'rejected');
+  });
+
+  test('should bind always callbacks provided in any argument, respecting their order, be it an array of functions, or a function', function () {
+    var rejected = [];
+    var cb = [];
+    for (var i = 0; i < 10; i++) {
+      cb.push((function (i) {
+        return function () { rejected.push(i); };
+      })(i));
+    }
+    this.t.always(cb[0],
+                 [cb[1], cb[2]],
+                 [cb[3],[cb[4], cb[5], cb[6]], cb[7], cb[8]],
+                 cb[9]);
+    this.d.reject();
+    deepEqual(rejected, [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]);
+  });
+
+  test('should not explode if provided an invalid argument', function () {
+   this.t.always(1, 'foo', NaN, Infinity, undefined);
+   this.t.always(null);
+   this.t.always([]);
+   this.t.always({});
+   this.t.always(/re/);
+   ok(true);
   });
 
   test('should trigger always callback immediately if deferred is already resolved', function() {
