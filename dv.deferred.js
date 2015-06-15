@@ -55,11 +55,9 @@ var deferred = (function (dv) {
       return this;
     };
 
-    function resolveWith() {
+    function resolveWith(context, args) {
       if (dd.state() === State.PENDING) {
-        var args = slice(arguments),
-          context = args.shift();
-        args = args[0] instanceof Array && args.length === 1 ? args[0] : args;
+        var args = args instanceof Array ? args : [ args ];
         dvState.value = [ State.RESOLVED, context, args ];
       }
       return this;
@@ -72,11 +70,9 @@ var deferred = (function (dv) {
       return this;
     };
 
-    function rejectWith() {
+    function rejectWith(context, args) {
       if (dd.state() === State.PENDING) {
-        var args = slice(arguments),
-          context = args.shift();
-        args = args[0] instanceof Array && args.length === 1 ? args[0] : args;
+        var args = args instanceof Array ? args : [ args ];
         dvState.value = [ State.REJECTED, context, args ];
       }
       return this;

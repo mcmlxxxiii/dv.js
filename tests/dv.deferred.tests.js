@@ -48,6 +48,13 @@ for (var i = 0; i < CONTEXTS.length; i++) {
     })(context);
 
 
+  module(context + ' general', { setup: setup });
+
+  test('should have state pending', function() {
+    ok(this.t.state() === 'pending');
+  });
+
+
 
   module(context + ' dv.deferred#promise', { setup: setup });
 
@@ -208,24 +215,14 @@ for (var i = 0; i < CONTEXTS.length; i++) {
     deepEqual(resolved, [ [4,5,6], [4,5,6], [4,5,6] ]);
   });
 
-  test('should trigger done callbacks passing them received arguments (passed as additional args with 2nd arg not being an array)', function() {
+  test('should trigger done callbacks passing them received arguments (turn the 2nd arg to an array if itis not)', function() {
     var resolved = [];
     this.t.done(function () { resolved.push(args(arguments)); }).
            done(function () { resolved.push(args(arguments)); }).
            done(function () { resolved.push(args(arguments)); });
     deepEqual(resolved, []);
     this.d.resolveWith(123, 4, 5, 6, 7);
-    deepEqual(resolved, [ [4,5,6,7], [4,5,6,7], [4,5,6,7] ]);
-  });
-
-  test('should trigger done callbacks passing them received arguments (passed as additional args with 2nd being an array)', function() {
-    var resolved = [];
-    this.t.done(function () { resolved.push(args(arguments)); }).
-           done(function () { resolved.push(args(arguments)); }).
-           done(function () { resolved.push(args(arguments)); });
-    deepEqual(resolved, []);
-    this.d.resolveWith(123, [4,5,6], 7);
-    deepEqual(resolved, [ [ [4,5,6], 7], [[4,5,6], 7], [[4,5,6], 7] ]);
+    deepEqual(resolved, [ [4], [4], [4] ]);
   });
 
   test('should trigger done callbacks w/ context provided', function() {
@@ -451,24 +448,14 @@ for (var i = 0; i < CONTEXTS.length; i++) {
     deepEqual(rejected, [ [4,5,6], [4,5,6], [4,5,6] ]);
   });
 
-  test('should trigger fail callbacks passing them received arguments (passed as additional args with 2nd arg not being an array)', function() {
+  test('should trigger fail callbacks passing them received arguments (turn the 2nd arg to an array if itis not)', function() {
     var rejected = [];
     this.t.fail(function () { rejected.push(args(arguments)); }).
            fail(function () { rejected.push(args(arguments)); }).
            fail(function () { rejected.push(args(arguments)); });
     deepEqual(rejected, []);
     this.d.rejectWith(123, 4, 5, 6, 7);
-    deepEqual(rejected, [ [4,5,6,7], [4,5,6,7], [4,5,6,7] ]);
-  });
-
-  test('should trigger fail callbacks passing them received arguments (passed as additional args with 2nd being an array)', function() {
-    var rejected = [];
-    this.t.fail(function () { rejected.push(args(arguments)); }).
-           fail(function () { rejected.push(args(arguments)); }).
-           fail(function () { rejected.push(args(arguments)); });
-    deepEqual(rejected, []);
-    this.d.rejectWith(123, [4,5,6], 7);
-    deepEqual(rejected, [ [[4,5,6], 7], [[4,5,6], 7], [[4,5,6], 7] ]);
+    deepEqual(rejected, [ [4], [4], [4] ]);
   });
 
   test('should trigger fail callbacks w/ context provided', function() {
