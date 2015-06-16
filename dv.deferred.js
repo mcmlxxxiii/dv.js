@@ -78,6 +78,22 @@ var deferred = (function (dv) {
       return this;
     };
 
+    function notify() {
+      if (dd.state() === State.PENDING) {
+        dvState.set([ State.PENDING, null, slice(arguments) ], true);
+      }
+      return this;
+    };
+
+    function notifyWith(context, args) {
+      if (dd.state() === State.PENDING) {
+        var args = args instanceof Array ? args : [ args ];
+        dvState.set([ State.PENDING, context, args ], true);
+      }
+      return this;
+    };
+
+
     function state() {
       return dvState.value[0];
     };
@@ -101,7 +117,7 @@ var deferred = (function (dv) {
       return this;
     };
 
-    function fail(callback) {
+    function fail() {
       var callbacks = flatten(arguments);
       for (var i = 0; i < callbacks.length; i++) {
         var one = callbacks[i];
@@ -120,7 +136,22 @@ var deferred = (function (dv) {
       return this;
     };
 
-    function always(callback) {
+    function progress() {
+      if (dvState.value[0] !== State.PENDING) return;
+      var callbacks = flatten(arguments);
+      for (var i = 0; i < callbacks.length; i++) {
+        var one = callbacks[i];
+        dvState.onchange((function (cb) {
+          return function (state, prev) {
+            if (state[0] !== State.PENDING) return;
+            cb.apply(dvState.value[1], dvState.value[2]);
+          };
+        })(one));
+      }
+      return this;
+    };
+
+    function always() {
       var callbacks = flatten(arguments);
       for (var i = 0; i < callbacks.length; i++) {
         var one = callbacks[i];
@@ -128,6 +159,7 @@ var deferred = (function (dv) {
         if (dvState.value[0] === State.PENDING) {
           dvState.onchange((function (cb) {
             return function (state, prev) {
+              if (state[0] === State.PENDING) return;
               cb.apply(dvState.value[1], dvState.value[2]);
             };
           })(one));
@@ -145,18 +177,22 @@ var deferred = (function (dv) {
 
     ps.done = done;
     ps.fail = fail;
+    ps.progress = progress;
     ps.always = always;
     ps.state = state;
     ps.promise = promise;
 
     dd.done = done;
     dd.fail = fail;
+    dd.progress = progress;
     dd.always = always;
     dd.state = state;
     dd.resolve = resolve;
     dd.resolveWith = resolveWith;
     dd.reject = reject;
     dd.rejectWith = rejectWith;
+    dd.notify = notify;
+    dd.notifyWith = notifyWith;
     dd.promise = promise;
 
     return dd;
