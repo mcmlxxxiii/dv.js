@@ -1,13 +1,21 @@
-## Next
+HEAD (after v0.1)
+=================
 
-(4) dv#link and dv#unlink now return self, so that shortcuts like following are possible.
+Multiple optimizations and improvements to tests. 
+
+Introduced **dv.deferred** and **dv.when**.
+
+### dv
+
+- Fixed invalid unlinking when other instances were also linked to where the one being unlinked was linked to.
+- Added _#get_ getter and _#set_ setted.
+- Made _#link_ and _#unlink_ now return self, so that shortcuts like following are possible.
 
 ```
 var dvA = dv().link(dvB);
 var dvC = dvD.unlink().link(dvB);
 ```
-
-(3) Initial value for mappings and lifts to avoid calculatioins on init.
+- Made lift treat the first excessive arg as an initial value (to avoid calculatioins on init).
 
 ```
 var sum = dv.lift(function (a, b, c) {
@@ -18,13 +26,11 @@ var strSize = dv.lift(function (str) {
   return str.length;
 })(dvStr, 0);
 ```
+- Made lifting functions receive current values as context (this).
 
-(2) Lifting function now provides current values as context (this).
+- Made lifting functions receive values as arguments instead of their dv's. It is better explained by the example.
 
-(1) Lifting function now provides dvs' values as arguments, not dvs.
-It is better explained by the example.
-
-**How it was previously:**
+**Previously:**
 
 ```
 var sum = dv.lift(function (dvA, dvB, dvC) {
@@ -32,7 +38,7 @@ var sum = dv.lift(function (dvA, dvB, dvC) {
 })(dvA, dvB, dvC);
 ```
 
-**How it is now:**
+**Now:**
 
 ```
 var sum = dv.lift(function (a, b, c) {
@@ -41,8 +47,8 @@ var sum = dv.lift(function (a, b, c) {
 ```
 
 
-## v0.1 (Sun Jul 06, 2014)
-
+v0.1 (Sun Jul 06, 2014)
+=======================
   - new dv(value)
   - new dv(liftFn, liftFnArgs)
   - dv(value)
