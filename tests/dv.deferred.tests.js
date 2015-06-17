@@ -693,6 +693,15 @@ for (var i = 0; i < CONTEXTS.length; i++) {
     deepEqual(pending, [ null, null, null ]);
   });
 
+  test('should not fail to notify two times in a row with the same args', function() {
+    var pending = [];
+    this.t.progress(function () { pending.push(args(arguments)); });
+    deepEqual(pending, []);
+    this.d.notify(100, 1001);
+    this.d.notify(100, 1001);
+    deepEqual(pending, [ [100, 1001], [100, 1001] ]);
+  });
+
   test('should not trigger done callbacks', function() {
     var resolved = [];
     this.t.done(function () { resolved.push(1); }).
@@ -789,6 +798,15 @@ for (var i = 0; i < CONTEXTS.length; i++) {
     deepEqual(pending, []);
     this.d.notifyWith(100);
     deepEqual(pending, [ 100, 100, 100 ]);
+  });
+
+  test('should not fail to notify two times in a row with the same args', function() {
+    var pending = [];
+    this.t.progress(function () { 'use strict'; pending.push(this); });
+    deepEqual(pending, []);
+    this.d.notifyWith(100);
+    this.d.notifyWith(100);
+    deepEqual(pending, [ 100, 100 ]);
   });
 
   test('should not trigger done callbacks', function() {
