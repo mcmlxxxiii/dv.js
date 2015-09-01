@@ -20,6 +20,10 @@ if (cjs) {
 
 var deferred = (function (dv) {
 
+  function isFunction(obj) {
+    return typeof obj === 'function';
+  }
+
   function slice(obj) {
     return Array.prototype.slice.call(obj);
   }
@@ -170,7 +174,13 @@ var deferred = (function (dv) {
       return this;
     };
 
-    function promise() {
+    function promise(obj) {
+      if (obj != null) {
+        for (var k in ps) {
+          obj[k] = ps[k];
+        }
+        return obj;
+      }
       return ps;
     };
 
@@ -200,45 +210,71 @@ var deferred = (function (dv) {
 
 
   /**
-   * NOTE Current implementation of `when` is absolute copy of jQuery.when
-   * implementation.
+   * The below implementation of `when` is an absolute copy of jQuery.when
+   * implementation as of Tue Jun 23, 2015.
    * https://github.com/jquery/jquery/blob/master/src/deferred.js
    */
   function when(subordinate /* , ..., subordinateN */) {
-    var i,
+    var method,
+      i = 0,
       resolveValues = slice(arguments),
       length = resolveValues.length,
-      remaining = length != 1 || (subordinate && typeof subordinate.promise === 'function') ? length : 0,
-      dfrrd = remaining === 1 ? subordinate : deferred(),
-      updateFunc = function (i, contexts, values) {
-        return function (value) {
+
+      // the count of uncompleted subordinates
+      remaining = length !== 1 || (subordinate && isFunction(subordinate.promise)) ? length : 0,
+
+      // the master Deferred.
+      // If resolveValues consist of only a single Deferred, just use that.
+      master = remaining === 1 ? subordinate : deferred(),
+
+      // Update function for both resolve and progress values
+      updateFunc = function(i, contexts, values) {
+        return function(value) {
+          'use strict';
           contexts[i] = this;
           values[i] = arguments.length > 1 ? slice(arguments) : value;
-          if (!(--remaining)) {
-            dfrrd.resolveWith(contexts, values);
+          if (values === progressValues) {
+            master.notifyWith(contexts, values);
+          } else if (!(--remaining)) {
+            master.resolveWith(contexts, values);
           }
         };
       },
+
+      progressValues,
+      progressContexts,
       resolveContexts;
 
+    // Add listeners to Deferred subordinates; treat others as resolved
     if (length > 1) {
+      progressValues = new Array(length);
+      progressContexts = new Array(length);
       resolveContexts = new Array(length);
-      for (i = 0; i < length; i++) {
-        if (resolveValues[i] && typeof resolveValues[i].promise === 'function') {
-          resolveValues[i].promise()
-            .done(updateFunc(i, resolveContexts, resolveValues))
-            .fail(dfrrd.reject);
+      for (; i < length; i++) {
+        if (resolveValues[i] &&
+            isFunction((method = resolveValues[i].promise))) {
+          method.call(resolveValues[i])
+              .progress(updateFunc(i, progressContexts, progressValues))
+              .done(updateFunc(i, resolveContexts, resolveValues))
+              .fail(master.reject);
+        } else if (resolveValues[i] &&
+            isFunction((method = resolveValues[i].then))) {
+          method.call(resolveValues[i],
+                      updateFunc(i, resolveContexts, resolveValues),
+                      master.reject,
+                      updateFunc(i, progressContexts, progressValues));
         } else {
           --remaining;
         }
       }
     }
 
+    // If we're not waiting on anything, resolve the master
     if (!remaining) {
-      dfrrd.resolveWith(resolveContexts, resolveValues);
+      master.resolveWith(resolveContexts, resolveValues);
     }
 
-    return dfrrd.promise();
+    return master.promise();
   }
 
   deferred.when = when;
