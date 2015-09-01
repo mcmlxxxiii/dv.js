@@ -267,11 +267,11 @@ test('lift function should not calculate value when there is initial value provi
 
   sinon.spy(window, 'dv');
 
-  lift = dv.lift(liftFn);
+  lift = dv.lift(15, liftFn);
 
   equal(dv.callCount, 0);
 
-  lifted = lift(dvA, dvB, dvC, 15);
+  lifted = lift(dvA, dvB, dvC);
 
   ok(dv.calledOnce);
   ok(dv.calledWithNew());
@@ -281,6 +281,25 @@ test('lift function should not calculate value when there is initial value provi
   window.dv.restore();
 });
 
+test('should fail if more than two arguments provided', function () {
+  throws(function () { dv.lift(1, 2, 3); },
+    new Error('dv.lift: accepts either 1 (liftFn) or 2 (initialValue, liftFn) args'));
+});
+
+test('should fail if no arguments provided', function () {
+  throws(function () { dv.lift(); },
+    new Error('dv.lift: accepts either 1 (liftFn) or 2 (initialValue, liftFn) args'));
+});
+
+test('should fail if liftFn argument is not a function (1 arg)', function () {
+  throws(function () { dv.lift(1); },
+    new Error('dv.lift: liftFn argument should be function'));
+});
+
+test('should fail if liftFn argument is not a function (2 args)', function () {
+  throws(function () { dv.lift(1, 2); },
+    new Error('dv.lift: liftFn argument should be function'));
+});
 
 
 module('dv#onchange method');
@@ -399,13 +418,13 @@ test('should unlink from other dv not affecting other linked ones', function() {
   v4.link(v);
 
   deepEqual(v._deps, [ v2, v3, v4 ]);
-  
+
   v2.unlink()
   deepEqual(v._deps, [ v3, v4 ]);
-  
+
   v4.unlink()
   deepEqual(v._deps, [ v3 ]);
-  
+
   v3.unlink()
   deepEqual(v._deps, undefined);
 });
@@ -541,7 +560,7 @@ test('lift function should receive current value as context (this)', function ()
 
 module('dv#map method');
 
-test('should return new dv lifted from self with function provided', function () {
+test('should return new dv lifted from self with function provided (as single arg)', function () {
   var dvStr = dv('abc'),
     mapFn = function (d) { return d.length; },
     mapped = dvStr.map(mapFn);
@@ -553,7 +572,7 @@ test('should return new dv lifted from self with function provided', function ()
   ok(mapped.value == 9);
 });
 
-test('should calculate value when there is no initial value provided', function () {
+test('should calculate value when there is no initial value provided (single arg is function)', function () {
   var dvA = dv('abcdefghijk'),
     mapFn = function (str) { return str.length; },
     dvB;
@@ -570,6 +589,30 @@ test('should calculate value when there is no initial value provided', function 
   window.dv.lift.restore();
 });
 
+test('should fail if more than two arguments provided', function () {
+  var dvA = new dv(1);
+  throws(function () { var v = dvA.map(1, 2, 3); },
+    new Error('dv#map: accepts either 1 (mapFn) or 2 (initialValue, mapFn) args'));
+});
+
+test('should fail if no arguments provided', function () {
+  var dvA = new dv(1);
+  throws(function () { var v = dvA.map(); },
+    new Error('dv#map: accepts either 1 (mapFn) or 2 (initialValue, mapFn) args'));
+});
+
+test('should fail if mapFn argument is not a function (1 arg)', function () {
+  var dvA = new dv(1);
+  throws(function () { var v = dvA.map(1); },
+    new Error('dv#map: mapFn argument should be function'));
+});
+
+test('should fail if mapFn argument is not a function (2 args)', function () {
+  var dvA = new dv(1);
+  throws(function () { var v = dvA.map(1, 2); },
+    new Error('dv#map: mapFn argument should be function'));
+});
+
 test('should not calculate value when there is initial value provided', function () {
   var dvA = dv('abcdefghijk'),
     mapFn = function (str) { return str.length; },
@@ -577,13 +620,12 @@ test('should not calculate value when there is initial value provided', function
 
   sinon.spy(dv, 'lift');
 
-  dvB = dvA.map(mapFn, 10001);
+  dvB = dvA.map(10001, mapFn);
 
   ok(dv.lift.calledOnce);
-  ok(dv.lift.calledWith(mapFn));
+  ok(dv.lift.calledWith(10001, mapFn));
 
   equal(dvB._value, 10001);
 
   window.dv.lift.restore();
 });
-

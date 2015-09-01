@@ -9,7 +9,16 @@
 
 dv = (function () {
 
-  function dv(value) {
+  function getFunctionSignature(fn) {
+    var fnCode = fn.toString(),
+      iBracketO = fnCode.indexOf('('),
+      iBracketC = fnCode.indexOf(')'),
+      fnSignature = fnCode.substr(iBracketO + 1, iBracketC - iBracketO - 1),
+      argNames = fnSignature.split(/\s*,\s*/);
+    return argNames;
+  }
+
+  function dv(initialValue) {
     var i, arr = [];
     if (arguments.callee !== this.constructor) {
       for (i = 0; i < arguments.length; i++) { arr.push('arguments[' + i + ']'); }
@@ -50,7 +59,7 @@ dv = (function () {
         this._args[i]._deps.push(this);
       }
 
-      // Not `if (value) {...` because it might be falsy,
+      // Not `if (initialValue) {...` because it might be falsy,
       if (arguments.length > 2) {
         this._value = arguments[2];
       } else {
@@ -59,30 +68,41 @@ dv = (function () {
     }
 
     else {
-      this.value = value;
+      this.value = initialValue;
     }
   }
 
+  dv.lift = function () {
+    var initialValue,
+      initialValueDefined = false,
+      liftFn;
 
-  dv.lift = function (fn) {
+    if (arguments.length == 1) {
+      liftFn = arguments[0];
+    } else if (arguments.length == 2) {
+      initialValueDefined = true;
+      initialValue = arguments[0];
+      liftFn = arguments[1];
+    } else {
+      throw new Error('dv.lift: accepts either 1 (liftFn) or 2 (initialValue, liftFn) args');
+    }
+
+    if (typeof liftFn != 'function') {
+      throw new Error('dv.lift: liftFn argument should be function');
+    }
+
     var cls = this,
-      fnCode = fn.toString(),
-      iBracketO = fnCode.indexOf('('),
-      iBracketC = fnCode.indexOf(')'),
-      fnSignature = fnCode.substr(iBracketO + 1, iBracketC - iBracketO - 1),
-      argNames = fnSignature.split(/\s*,\s*/);
+      argNames = getFunctionSignature(liftFn);
 
     return function () {
-      var args = Array.prototype.slice.call(arguments, 0, argNames.length),
-        initialValue = arguments[argNames.length];
-      if (arguments.length > argNames.length) {
-        return new cls(fn, args, initialValue);
+      var args = Array.prototype.slice.call(arguments);
+      if (initialValueDefined) {
+        return new cls(liftFn, args, initialValue);
       } else {
-        return new cls(fn, args);
+        return new cls(liftFn, args);
       }
     };
   };
-
 
   dv.prototype.onchange = function (handlerFn) {
     if (!this._changeHandlers) this._changeHandlers = [];
@@ -119,14 +139,31 @@ dv = (function () {
     return this;
   };
 
-  dv.prototype.map = function (mapFn, initialValue) {
-    if (arguments.length > 1) {
-      return dv.lift(mapFn)(this, initialValue);
+  dv.prototype.map = function () {
+    var initialValue,
+      initialValueDefined = false,
+      mapFn;
+
+    if (arguments.length == 1) {
+      mapFn = arguments[0];
+    } else if (arguments.length == 2) {
+      initialValueDefined = true;
+      initialValue = arguments[0];
+      mapFn = arguments[1];
+    } else {
+      throw new Error('dv#map: accepts either 1 (mapFn) or 2 (initialValue, mapFn) args');
+    }
+
+    if (typeof mapFn != 'function') {
+      throw new Error('dv#map: mapFn argument should be function');
+    }
+
+    if (initialValueDefined) {
+      return dv.lift(initialValue, mapFn)(this);
     } else {
       return dv.lift(mapFn)(this);
     }
   };
-
 
   dv.prototype.get = function () {
     return this._value;
@@ -193,7 +230,6 @@ dv = (function () {
       this._propagateChange();
     }
   };
-
 
   return dv;
 
