@@ -229,6 +229,38 @@ test('should return correct dv lift constructor', function () {
   window.dv.restore();
 });
 
+test('should return correct old values dependent dv lift constructor when args provided cover connections two times strictly', function () {
+  var lift,
+    dvA = dv(1),
+    dvB = dv(2),
+    dvC = dv(3),
+    valuesForLifting,
+    lifted,
+    liftFn = function (a, a_, b, b_, c, c_) {
+      valuesForLifting = args(arguments);
+      return a + b + c;
+    };
+
+  sinon.spy(window, 'dv');
+
+  lift = dv.lift(liftFn);
+
+  equal(dv.callCount, 0);
+
+  lifted = lift(dvA, dvB, dvC);
+
+  ok(dv.calledOnce);
+  ok(dv.calledWithNew());
+  ok(dv.calledWith(liftFn, [ dvA, dvB, dvC ]));
+  equal(lifted._value, 6);
+
+  dvA.value = 5;
+  ok(dv.calledOnce);
+  deepEqual(valuesForLifting, [5,1,2,2,3,3]);
+
+  window.dv.restore();
+});
+
 test('lift function should calculate value when there is no initial value provided', function () {
   var lift,
     dvA = dv(1),
@@ -458,6 +490,16 @@ test('should return correct value', function() {
   ok(v.value == 123);
 });
 
+
+module('dv#oldValue getter');
+
+test('should return correct value', function() {
+  var v = dv();
+  v._oldValue = 123;
+  ok(v.oldValue == 123);
+});
+
+// TODO Should check old values for just created dv-s (lift, map, link, dv) with initial values and without.
 
 
 module('dv#value setter');
