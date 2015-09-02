@@ -1,9 +1,29 @@
 HEAD (after v0.1)
 =================
 
-Multiple optimizations and improvements to tests. 
+- Extended dv.lift with the way to have both new and old values in lift functions.
+```
+  var a = dv();
+  var b = dv();
+  var c = dv.lift(function (a, a_, b, b_) {
+    return a == 1 && a_ == 0 & b == b_;
+  })(a, b);
+```
 
-Introduced **dv.deferred** and **dv.when**.
+- Improved dv.lift and dv#map to receive initial value with their 1st arg.
+```
+  // Previously
+  var a = dv.lift(function (…) {…})(…, 'initial');
+  var b = a.map(function (…, 'value') {…});
+
+  // Now
+  var a = dv.lift('initial', function (…) {…})(…);
+  var b = a.map('value', function (…) {…});
+```
+
+- Introduced **dv.deferred** and **dv.when**.
+
+Multiple optimizations and improvements to tests.
 
 ### dv
 
