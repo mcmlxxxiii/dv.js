@@ -97,6 +97,8 @@ dv = (function () {
       throw new Error('dv.lift: liftFn argument should be function');
     }
 
+    // This hack is needed to make Sinon be able to spy on dv when testing lift.
+    // TODO Find a way to eliminate this.
     var cls = this;
 
     return function () {
