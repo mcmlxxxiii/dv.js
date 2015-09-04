@@ -67,15 +67,13 @@ dv = (function () {
       if (arguments.length > 2) {
         this._value = arguments[2];
       } else {
-        this._calculateValue();
+        this._value = this._fn.apply(this._value, this._argsValues(this));
       }
     }
 
     else {
       this.value = initialValue;
     }
-
-    this._oldValue = this._value;
   }
 
   dv.lift = function () {
@@ -178,11 +176,11 @@ dv = (function () {
 
   dv.prototype.set = function (newValue, forceFlag) {
     forceFlag = !!forceFlag;
-    var oldValue = this._value;
     if (forceFlag || this._value !== newValue) {
+      this._oldValue = this._value;
       this._value = newValue;
-      this._triggerChange(newValue, oldValue);
-      this._propagateChange(this);
+      this._triggerChange(this._value, this._oldValue);
+      this._propagateChange();
     }
   };
 
@@ -209,8 +207,9 @@ dv = (function () {
     }
   };
 
-  dv.prototype._propagateChange = function (propagatedFrom) {
-    var i;
+  dv.prototype._propagateChange = function () {
+    var i,
+      propagatedFrom = this;
     if (this._deps instanceof Array) {
       for (i = 0; i < this._deps.length; i++) {
         this._deps[i]._calculateValue(propagatedFrom);
@@ -224,7 +223,9 @@ dv = (function () {
     for (i = 0; i < this._args.length; i++) {
       values.push(this._args[i].value);
       if (this._calculationDependsOnOldValues) {
-        if (changed == this._args[i]) {
+        if (changed == this) {
+          values.push(this.oldValue);
+        } else if (changed == this._args[i]) {
           values.push(this._args[i].oldValue);
         } else {
           values.push(this._args[i].value);
@@ -247,12 +248,11 @@ dv = (function () {
     }
 
     if (newValue !== oldValue) {
+      this._oldValue = oldValue;
       this._value = newValue;
       this._triggerChange(newValue, oldValue);
-      this._propagateChange(this);
+      this._propagateChange();
     }
-
-    this._oldValue = oldValue;
   };
 
   return dv;

@@ -232,13 +232,13 @@ test('should return correct dv lift constructor', function () {
 test('should return correct old values dependent dv lift constructor when args provided cover connections two times strictly', function () {
   var lift,
     dvA = dv(1),
-    dvB = dv(2),
+    dvB = dv(),
     dvC = dv(3),
     valuesForLifting,
     lifted,
     liftFn = function (a, a_, b, b_, c, c_) {
       valuesForLifting = args(arguments);
-      return a + b + c;
+      return a + (b || 0) + c;
     };
 
   sinon.spy(window, 'dv');
@@ -252,11 +252,13 @@ test('should return correct old values dependent dv lift constructor when args p
   ok(dv.calledOnce);
   ok(dv.calledWithNew());
   ok(dv.calledWith(liftFn, [ dvA, dvB, dvC ]));
-  equal(lifted._value, 6);
+  equal(lifted.value, 4);
 
   dvA.value = 5;
-  ok(dv.calledOnce);
-  deepEqual(valuesForLifting, [5,1,2,2,3,3]);
+  deepEqual(valuesForLifting, [5,1,undefined,undefined,3,3]);
+
+  dvB.value = 2;
+  deepEqual(valuesForLifting, [5,5,2,undefined,3,3]);
 
   window.dv.restore();
 });
@@ -611,6 +613,23 @@ test('should return new dv lifted from self with function provided (as single ar
   ok(mapped.value == 3);
 
   dvStr.value = 'abcdefghi';
+  ok(mapped.value == 9);
+});
+
+test('map function should get new and old values when it receives two arguments', function () {
+  var dvStr = dv('abc'),
+    received,
+    mapped = dvStr.map(function (d, d_) {
+      received = args(arguments);
+      return d.length;
+    });
+
+  ok(mapped instanceof dv);
+  ok(mapped.value == 3);
+  deepEqual(received, ['abc', undefined]);
+
+  dvStr.value = 'abcdefghi';
+  deepEqual(received, ['abcdefghi', 'abc']);
   ok(mapped.value == 9);
 });
 
