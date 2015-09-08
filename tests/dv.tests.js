@@ -354,6 +354,11 @@ test('should remember change handlers in the order they are registered', functio
   deepEqual(v._changeHandlers, [ spy1, spy3, spy2 ]);
 });
 
+test('should return self', function() {
+  var v = dv(), spy = sinon.spy();
+  ok(v === v.onchange(spy));
+});
+
 
 
 module('dv#cleanup method');
@@ -373,6 +378,13 @@ test('should cleanup change handlers', function() {
   v.cleanup();
 
   ok(v._changeHandlers == undefined);
+});
+
+test('should return self', function() {
+  var v = dv(3),
+    spy = sinon.spy();
+  v.onchange(spy);
+  ok(v === v.cleanup());
 });
 
 

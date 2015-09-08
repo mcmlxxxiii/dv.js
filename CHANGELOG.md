@@ -1,6 +1,8 @@
 HEAD (after v0.1)
 =================
 
+- Made #onchange and #cleanup return self.
+
 - Reworked old and new values comparison from strict equal (===) to deep object compare!
 
 - Extended dv.lift with the way to have both new and old values in lift functions.

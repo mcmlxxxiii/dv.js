@@ -132,10 +132,12 @@ dv = (function () {
   dv.prototype.onchange = function (handlerFn) {
     if (!this._changeHandlers) this._changeHandlers = [];
     this._changeHandlers.push(handlerFn);
+    return this;
   };
 
   dv.prototype.cleanup = function () {
     delete this._changeHandlers;
+    return this;
   };
 
   dv.prototype.link = function (dvOther, initialValue) {
