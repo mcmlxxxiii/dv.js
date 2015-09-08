@@ -1,6 +1,8 @@
 HEAD (after v0.1)
 =================
 
+- Reworked old and new values comparison from strict equal (===) to deep object compare!
+
 - Extended dv.lift with the way to have both new and old values in lift functions.
 ```
   var a = dv();
@@ -22,13 +24,10 @@ HEAD (after v0.1)
 ```
 
 - Introduced **dv.deferred** and **dv.when**.
-
-Multiple optimizations and improvements to tests.
-
-### dv
-
 - Fixed invalid unlinking when other instances were also linked to where the one being unlinked was linked to.
-- Added _#get_ getter and _#set_ setted.
+- Added _#get_ getter and _#set_ setter. _#set_ setter treats
+  2nd argument as a flag whether it should force setting the same
+  value, tirgger onchange event and propagate the value further.
 - Made _#link_ and _#unlink_ now return self, so that shortcuts like following are possible.
 
 ```
@@ -49,36 +48,31 @@ var strSize = dv.lift(function (str) {
 - Made lifting functions receive current values as context (this).
 
 - Made lifting functions receive values as arguments instead of their dv's. It is better explained by the example.
-
-**Previously:**
-
 ```
-var sum = dv.lift(function (dvA, dvB, dvC) {
-  return dvA.value + dvB.value + dvC.value;
-})(dvA, dvB, dvC);
-```
+  // Previously
+  var sum = dv.lift(function (dvA, dvB, dvC) {
+    return dvA.value + dvB.value + dvC.value;
+  })(dvA, dvB, dvC);
 
-**Now:**
-
-```
-var sum = dv.lift(function (a, b, c) {
-  return a + b + c;
-})(dvA, dvB, dvC);
+  // Now
+  var sum = dv.lift(function (a, b, c) {
+    return a + b + c;
+  })(dvA, dvB, dvC);
 ```
 
 
 v0.1 (Sun Jul 06, 2014)
 =======================
-  - new dv(value)
-  - new dv(liftFn, liftFnArgs)
-  - dv(value)
-  - dv(liftFn, liftFnArgs)
-  - dv.lift(liftFn)
-  - dv#map(mapFn)
-  - dv#link(otherDv)
-  - dv#unlink()
-  - dv#cleanup()
-  - dv#onchange(callbackFn)
-  - dv#value getter
-  - dv#value setter
-  - node.js compatibility
+- new dv(value)
+- new dv(liftFn, liftFnArgs)
+- dv(value)
+- dv(liftFn, liftFnArgs)
+- dv.lift(liftFn)
+- dv#map(mapFn)
+- dv#link(otherDv)
+- dv#unlink()
+- dv#cleanup()
+- dv#onchange(callbackFn)
+- dv#value getter
+- dv#value setter
+- node.js compatibility

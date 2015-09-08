@@ -509,7 +509,7 @@ module('dv#value setter');
 test('should set value correctly', function() {
   var v = dv(3);
   v.value = 123;
-  ok(v._value == 123);
+  equal(v._value, 123);
 });
 
 test('should trigger change handlers', function() {
@@ -529,23 +529,34 @@ test('should trigger change handlers', function() {
   sinon.assert.callOrder(spy1, spy3, spy2);
 });
 
-test('should not trigger changeHandlers when value was not changed', function() {
-  var v = dv(3),
-    spy1 = sinon.spy(),
-    spy2 = sinon.spy(),
-    spy3 = sinon.spy();
-
-  v.onchange(spy1);
-  v.onchange(spy3);
-  v.onchange(spy2);
-
-  v.value = 3;
-  ok(spy1.notCalled);
-  ok(spy2.notCalled);
-  ok(spy3.notCalled);
+test('should not trigger changeHandlers when value was not changed (scalar types)', function() {
+  var values = [3, '123', true, null, Infinity, undefined];
+  for (var i = 0; i < values.length; i++) {
+    var v = dv(values[i]),
+      spy = sinon.spy();
+    v.onchange(spy);
+    v.value = values[i];
+    ok(spy.notCalled);
+  }
 });
 
-test('should propagate change to linked instances', function() {
+test('should not trigger changeHandlers when value was not changed (array)', function() {
+  var v = dv([1,2,[3,4],5]),
+    spy = sinon.spy();
+  v.onchange(spy);
+  v.value = [1,2,[3,4],5];
+  ok(spy.notCalled);
+});
+
+test('should not trigger changeHandlers when value was not changed (object)', function() {
+  var v = dv({a:1,b:{c:2,d:3}}),
+    spy = sinon.spy();
+  v.onchange(spy);
+  v.value = {a:1,b:{c:2,d:3}};
+  ok(spy.notCalled);
+});
+
+test('should propagate change to linked instances when changed', function() {
   var v = dv(3),
     v2 = dv(4),
     v3 = dv(5);

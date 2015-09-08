@@ -18,6 +18,26 @@ dv = (function () {
     return argNames;
   }
 
+  function objSize(obj) {
+    if (typeof Object.keys === 'function') return Object.keys(obj).length;
+    var count = 0;
+    for (var i in obj) { count++; }
+    return count;
+  }
+
+  function compare(a, b) {
+    if (a !== b) {
+      if (!(a instanceof Object && b instanceof Object)) return false;
+      if (objSize(a) !== objSize(b)) return false;
+      var isIdentical = true;
+      for (var i in a) {
+        if (!compare(a[i], b[i])) { isIdentical = false; break; }
+      }
+      return isIdentical;
+    }
+    return true;
+  }
+
   function dv(initialValue) {
     var i, arr = [];
     if (arguments.callee !== this.constructor) {
@@ -176,7 +196,7 @@ dv = (function () {
 
   dv.prototype.set = function (newValue, forceFlag) {
     forceFlag = !!forceFlag;
-    if (forceFlag || this._value !== newValue) {
+    if (forceFlag || !compare(this._value, newValue)) {
       this._oldValue = this._value;
       this._value = newValue;
       this._triggerChange(this._value, this._oldValue);
@@ -247,7 +267,7 @@ dv = (function () {
       oldValue = this._value;
     }
 
-    if (newValue !== oldValue) {
+    if (!compare(newValue, oldValue)) {
       this._oldValue = oldValue;
       this._value = newValue;
       this._triggerChange(newValue, oldValue);
