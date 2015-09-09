@@ -336,6 +336,30 @@ test('should fail if liftFn argument is not a function (2 args)', function () {
 });
 
 
+
+module('dv.link method');
+
+test('should create and return new dv wo/ initial value and call #link method on it passing own arguments to it', function() {
+  var one = dv();
+
+  sinon.spy(window, 'dv');
+  sinon.stub(window.dv.prototype, 'link').returns('Good!');
+
+  var two = dv.link(one, 3);
+
+  ok(dv.calledOnce);
+  ok(dv.calledWithNew());
+  ok(dv.calledWith());
+
+  ok(window.dv.prototype.link.calledWith(one, 3));
+  ok(two === 'Good!');
+
+  window.dv.prototype.link.restore();
+  window.dv.restore();
+});
+
+
+
 module('dv#onchange method');
 
 test('should remember change handlers in the order they are registered', function() {

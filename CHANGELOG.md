@@ -1,6 +1,8 @@
 HEAD (after v0.1)
 =================
 
+- Added handy utility dv.link class method. `dv.link(someDv)` and `dv().link(someDv)` lead to same result.
+
 - Made #onchange and #cleanup return self.
 
 - Reworked old and new values comparison from strict equal (===) to deep object compare!

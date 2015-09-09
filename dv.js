@@ -116,7 +116,7 @@ dv = (function () {
     }
 
     // This hack is needed to make Sinon be able to spy on dv when testing lift.
-    // TODO Find a way to eliminate this.
+    // TODO Find a way to eliminate this here and in other class methods.
     var cls = this;
 
     return function () {
@@ -127,6 +127,12 @@ dv = (function () {
         return new cls(liftFn, args);
       }
     };
+  };
+
+  dv.link = function () {
+    var cls = this;
+    var link = new cls();
+    return link.link.apply(link, arguments);
   };
 
   dv.prototype.onchange = function (handlerFn) {
