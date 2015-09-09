@@ -28,18 +28,20 @@ HEAD (after v0.1)
 ```
 
 - Introduced **dv.deferred** and **dv.when**.
+
 - Fixed invalid unlinking when other instances were also linked to where the one being unlinked was linked to.
+
 - Added _#get_ getter and _#set_ setter. _#set_ setter treats
   2nd argument as a flag whether it should force setting the same
   value, tirgger onchange event and propagate the value further.
-- Made _#link_ and _#unlink_ now return self, so that shortcuts like following are possible.
 
+- Made _#link_ and _#unlink_ now return self, so that shortcuts like following are possible.
 ```
 var dvA = dv().link(dvB);
 var dvC = dvD.unlink().link(dvB);
 ```
-- Made lift treat the first excessive arg as an initial value (to avoid calculatioins on init).
 
+- Made lift treat the first excessive arg as an initial value (to avoid calculatioins on init).
 ```
 var sum = dv.lift(function (a, b, c) {
   return a + b + c;
@@ -49,6 +51,7 @@ var strSize = dv.lift(function (str) {
   return str.length;
 })(dvStr, 0);
 ```
+
 - Made lifting functions receive current values as context (this).
 
 - Made lifting functions receive values as arguments instead of their dv's. It is better explained by the example.
