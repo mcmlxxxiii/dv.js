@@ -111,7 +111,7 @@ dv = (function () {
       throw new Error('dv.lift: accepts either 1 (liftFn) or 2 (initialValue, liftFn) args');
     }
 
-    if (typeof liftFn != 'function') {
+    if (typeof liftFn !== 'function') {
       throw new Error('dv.lift: liftFn argument should be function');
     }
 
@@ -136,6 +136,10 @@ dv = (function () {
   };
 
   dv.prototype.onChange = function (handlerFn) {
+    if (typeof handlerFn !== 'function') {
+      throw new Error('dv.onChange: accepts 1 (handlerFn) arg');
+    }
+
     if (!this._changeHandlers) this._changeHandlers = [];
     this._changeHandlers.push(handlerFn);
     return this;

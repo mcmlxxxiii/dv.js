@@ -362,6 +362,13 @@ test('should create and return new dv wo/ initial value and call #link method on
 
 module('dv#onChange method');
 
+test('should fail if 1st argument is not a function', function () {
+  throws(function () {
+    var dv1 = dv();
+    dv1.onChange('not a function');
+  }, new Error('dv.onChange: accepts 1 (handlerFn) arg'));
+});
+
 test('should remember change handlers in the order they are registered', function() {
   var v = dv(3),
     spy1 = sinon.spy(),
