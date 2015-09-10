@@ -360,7 +360,7 @@ test('should create and return new dv wo/ initial value and call #link method on
 
 
 
-module('dv#onchange method');
+module('dv#onChange method');
 
 test('should remember change handlers in the order they are registered', function() {
   var v = dv(3),
@@ -368,19 +368,19 @@ test('should remember change handlers in the order they are registered', functio
     spy2 = sinon.spy(),
     spy3 = sinon.spy();
 
-  v.onchange(spy1);
+  v.onChange(spy1);
   deepEqual(v._changeHandlers, [ spy1 ]);
 
-  v.onchange(spy3);
+  v.onChange(spy3);
   deepEqual(v._changeHandlers, [ spy1, spy3 ]);
 
-  v.onchange(spy2);
+  v.onChange(spy2);
   deepEqual(v._changeHandlers, [ spy1, spy3, spy2 ]);
 });
 
 test('should return self', function() {
   var v = dv(), spy = sinon.spy();
-  ok(v === v.onchange(spy));
+  ok(v === v.onChange(spy));
 });
 
 
@@ -393,9 +393,9 @@ test('should cleanup change handlers', function() {
     spy2 = sinon.spy(),
     spy3 = sinon.spy();
 
-  v.onchange(spy1);
-  v.onchange(spy2);
-  v.onchange(spy3);
+  v.onChange(spy1);
+  v.onChange(spy2);
+  v.onChange(spy3);
 
   deepEqual(v._changeHandlers, [ spy1, spy2, spy3 ]);
 
@@ -407,7 +407,7 @@ test('should cleanup change handlers', function() {
 test('should return self', function() {
   var v = dv(3),
     spy = sinon.spy();
-  v.onchange(spy);
+  v.onChange(spy);
   ok(v === v.cleanup());
 });
 
@@ -566,9 +566,9 @@ test('should trigger change handlers', function() {
     spy2 = sinon.spy(),
     spy3 = sinon.spy();
 
-  v.onchange(spy1);
-  v.onchange(spy3);
-  v.onchange(spy2);
+  v.onChange(spy1);
+  v.onChange(spy3);
+  v.onChange(spy2);
 
   v.set(123);
   ok(spy1.calledOnce);
@@ -582,7 +582,7 @@ test('should not trigger changeHandlers when value was not changed (scalar types
   for (var i = 0; i < values.length; i++) {
     var v = dv(values[i]),
       spy = sinon.spy();
-    v.onchange(spy);
+    v.onChange(spy);
     v.set(values[i]);
     ok(spy.notCalled);
   }
@@ -591,7 +591,7 @@ test('should not trigger changeHandlers when value was not changed (scalar types
 test('should not trigger changeHandlers when value was not changed (array)', function() {
   var v = dv([1,2,[3,4],5]),
     spy = sinon.spy();
-  v.onchange(spy);
+  v.onChange(spy);
   v.set([1,2,[3,4],5]);
   ok(spy.notCalled);
 });
@@ -599,7 +599,7 @@ test('should not trigger changeHandlers when value was not changed (array)', fun
 test('should not trigger changeHandlers when value was not changed (object)', function() {
   var v = dv({a:1,b:{c:2,d:3}}),
     spy = sinon.spy();
-  v.onchange(spy);
+  v.onChange(spy);
   v.set({a:1,b:{c:2,d:3}});
   ok(spy.notCalled);
 });
@@ -742,9 +742,9 @@ test('should trigger change handlers', function() {
     spy2 = sinon.spy(),
     spy3 = sinon.spy();
 
-  v.onchange(spy1);
-  v.onchange(spy3);
-  v.onchange(spy2);
+  v.onChange(spy1);
+  v.onChange(spy3);
+  v.onChange(spy2);
 
   v.set(123, true);
   ok(spy1.calledOnce);
@@ -758,7 +758,7 @@ test('should trigger changeHandlers when value was not changed (scalar types)', 
   for (var i = 0; i < values.length; i++) {
     var v = dv(values[i]),
       spy = sinon.spy();
-    v.onchange(spy);
+    v.onChange(spy);
     v.set(values[i], true);
     ok(spy.calledOnce);
   }
@@ -767,7 +767,7 @@ test('should trigger changeHandlers when value was not changed (scalar types)', 
 test('should trigger changeHandlers when value was not changed (array)', function() {
   var v = dv([1,2,[3,4],5]),
     spy = sinon.spy();
-  v.onchange(spy);
+  v.onChange(spy);
   v.set([1,2,[3,4],5], true);
   ok(spy.calledOnce);
 });
@@ -775,7 +775,7 @@ test('should trigger changeHandlers when value was not changed (array)', functio
 test('should not trigger changeHandlers when value was not changed (object)', function() {
   var v = dv({a:1,b:{c:2,d:3}}),
     spy = sinon.spy();
-  v.onchange(spy);
+  v.onChange(spy);
   v.set({a:1,b:{c:2,d:3}}, true);
   ok(spy.calledOnce);
 });

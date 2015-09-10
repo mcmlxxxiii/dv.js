@@ -1,6 +1,8 @@
 HEAD (after v0.1)
 =================
 
+- #onchange method nrenamed into #onChange.
+
 - Setting value with forceFlag now propagates the change to the lifts and their lifts and so on.
 
 - Added handy utility dv.link class method. `dv.link(someDv)` and `dv().link(someDv)` lead to same result.
@@ -35,7 +37,7 @@ HEAD (after v0.1)
 
 - Added _#get_ getter and _#set_ setter. _#set_ setter treats
   2nd argument as a flag whether it should force setting the same
-  value, tirgger onchange event and propagate the value further.
+  value, trigger onchange event and propagate the value further.
 
 - Made _#link_ and _#unlink_ now return self, so that shortcuts like following are possible.
 ```

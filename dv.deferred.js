@@ -110,7 +110,7 @@ var deferred = (function (dv) {
         if (dvState.value[0] === State.RESOLVED) {
           one.apply(dvState.value[1], dvState.value[2]);
         } else {
-          dvState.onchange((function (cb) {
+          dvState.onChange((function (cb) {
             return function (state, prev) {
               if (state[0] !== State.RESOLVED) return;
               cb.apply(dvState.value[1], dvState.value[2]);
@@ -129,7 +129,7 @@ var deferred = (function (dv) {
         if (dvState.value[0] === State.REJECTED) {
           one.apply(dvState.value[1], dvState.value[2]);
         } else {
-          dvState.onchange((function (cb) {
+          dvState.onChange((function (cb) {
             return function (state, prev) {
               if (state[0] !== State.REJECTED) return;
               cb.apply(dvState.value[1], dvState.value[2]);
@@ -145,7 +145,7 @@ var deferred = (function (dv) {
       var callbacks = flatten(arguments);
       for (var i = 0; i < callbacks.length; i++) {
         var one = callbacks[i];
-        dvState.onchange((function (cb) {
+        dvState.onChange((function (cb) {
           return function (state, prev) {
             if (state[0] !== State.PENDING) return;
             cb.apply(dvState.value[1], dvState.value[2]);
@@ -161,7 +161,7 @@ var deferred = (function (dv) {
         var one = callbacks[i];
         if (typeof one !== 'function') continue;
         if (dvState.value[0] === State.PENDING) {
-          dvState.onchange((function (cb) {
+          dvState.onChange((function (cb) {
             return function (state, prev) {
               if (state[0] === State.PENDING) return;
               cb.apply(dvState.value[1], dvState.value[2]);

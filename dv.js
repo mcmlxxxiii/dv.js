@@ -135,7 +135,7 @@ dv = (function () {
     return link.link.apply(link, arguments);
   };
 
-  dv.prototype.onchange = function (handlerFn) {
+  dv.prototype.onChange = function (handlerFn) {
     if (!this._changeHandlers) this._changeHandlers = [];
     this._changeHandlers.push(handlerFn);
     return this;
