@@ -208,7 +208,7 @@ dv = (function () {
       this._oldValue = this._value;
       this._value = newValue;
       this._triggerChange(this._value, this._oldValue);
-      this._propagateChange();
+      this._propagateChange(forceFlag);
     }
   };
 
@@ -235,12 +235,12 @@ dv = (function () {
     }
   };
 
-  dv.prototype._propagateChange = function () {
+  dv.prototype._propagateChange = function (forceFlag) {
     var i,
       propagatedFrom = this;
     if (this._deps instanceof Array) {
       for (i = 0; i < this._deps.length; i++) {
-        this._deps[i]._calculateValue(propagatedFrom);
+        this._deps[i]._calculateValue(propagatedFrom, forceFlag);
       }
     }
   };
@@ -263,7 +263,7 @@ dv = (function () {
     return values;
   };
 
-  dv.prototype._calculateValue = function (propagatedFrom) {
+  dv.prototype._calculateValue = function (propagatedFrom, forceFlag) {
     var newValue,
       oldValue;
 
@@ -275,11 +275,11 @@ dv = (function () {
       oldValue = this._value;
     }
 
-    if (!compare(newValue, oldValue)) {
+    if (forceFlag || !compare(newValue, oldValue)) {
       this._oldValue = oldValue;
       this._value = newValue;
       this._triggerChange(newValue, oldValue);
-      this._propagateChange();
+      this._propagateChange(forceFlag);
     }
   };
 

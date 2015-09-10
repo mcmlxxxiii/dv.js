@@ -1,6 +1,8 @@
 HEAD (after v0.1)
 =================
 
+- Setting value with forceFlag now propagates the change to the lifts and their lifts and so on.
+
 - Added handy utility dv.link class method. `dv.link(someDv)` and `dv().link(someDv)` lead to same result.
 
 - Made #onchange and #cleanup return self.

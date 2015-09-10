@@ -223,7 +223,7 @@ test('should return correct dv lift constructor', function () {
 
   ok(dv.calledOnce);
   ok(dv.calledWithNew());
-  ok(dv.calledWith(liftFn, [ dvA, dvB, dvC ]));
+  ok(dv.calledWithExactly(liftFn, [ dvA, dvB, dvC ]));
   equal(lifted._value, 6);
 
   window.dv.restore();
@@ -251,7 +251,7 @@ test('should return correct old values dependent dv lift constructor when args p
 
   ok(dv.calledOnce);
   ok(dv.calledWithNew());
-  ok(dv.calledWith(liftFn, [ dvA, dvB, dvC ]));
+  ok(dv.calledWithExactly(liftFn, [ dvA, dvB, dvC ]));
   equal(lifted.value, 4);
 
   dvA.value = 5;
@@ -283,7 +283,7 @@ test('lift function should calculate value when there is no initial value provid
 
   ok(dv.calledOnce);
   ok(dv.calledWithNew());
-  ok(dv.calledWith(liftFn, [ dvA, dvB, dvC ]));
+  ok(dv.calledWithExactly(liftFn, [ dvA, dvB, dvC ]));
   equal(lifted._value, 6);
 
   window.dv.restore();
@@ -309,7 +309,7 @@ test('lift function should not calculate value when there is initial value provi
 
   ok(dv.calledOnce);
   ok(dv.calledWithNew());
-  ok(dv.calledWith(liftFn, [ dvA, dvB, dvC ], 15));
+  ok(dv.calledWithExactly(liftFn, [ dvA, dvB, dvC ], 15));
   equal(lifted._value, 15);
 
   window.dv.restore();
@@ -349,9 +349,9 @@ test('should create and return new dv wo/ initial value and call #link method on
 
   ok(dv.calledOnce);
   ok(dv.calledWithNew());
-  ok(dv.calledWith());
+  ok(dv.calledWithExactly());
 
-  ok(window.dv.prototype.link.calledWith(one, 3));
+  ok(window.dv.prototype.link.calledWithExactly(one, 3));
   ok(two === 'Good!');
 
   window.dv.prototype.link.restore();
@@ -456,6 +456,7 @@ test('should return self', function() {
   ok(v === v.link(otherV));
 });
 
+// TODO test for link's initial values.
 
 
 module('dv#unlink method');
@@ -520,12 +521,22 @@ test('should return self', function() {
 
 
 
+module('dv#get getter');
+
+test('should return value of #_value', function() {
+  var v = dv();
+  v._value = 'Good!';
+  ok(v.get() === 'Good!');
+});
+
+
+
 module('dv#value getter');
 
-test('should return correct value', function() {
+test('should return the return of #get getter', function() {
   var v = dv(3);
-  v._value = 123;
-  ok(v.value == 123);
+  sinon.stub(v, 'get').returns('Good!');
+  ok(v.value === 'Good!');
 });
 
 
@@ -540,11 +551,12 @@ test('should return correct value', function() {
 // TODO Should check old values for just created dv-s (lift, map, link, dv) with initial values and without.
 
 
-module('dv#value setter');
+
+module('dv#set setter');
 
 test('should set value correctly', function() {
   var v = dv(3);
-  v.value = 123;
+  v.set(123);
   equal(v._value, 123);
 });
 
@@ -558,7 +570,7 @@ test('should trigger change handlers', function() {
   v.onchange(spy3);
   v.onchange(spy2);
 
-  v.value = 123;
+  v.set(123);
   ok(spy1.calledOnce);
   ok(spy2.calledOnce);
   ok(spy3.calledOnce);
@@ -571,7 +583,7 @@ test('should not trigger changeHandlers when value was not changed (scalar types
     var v = dv(values[i]),
       spy = sinon.spy();
     v.onchange(spy);
-    v.value = values[i];
+    v.set(values[i]);
     ok(spy.notCalled);
   }
 });
@@ -580,7 +592,7 @@ test('should not trigger changeHandlers when value was not changed (array)', fun
   var v = dv([1,2,[3,4],5]),
     spy = sinon.spy();
   v.onchange(spy);
-  v.value = [1,2,[3,4],5];
+  v.set([1,2,[3,4],5]);
   ok(spy.notCalled);
 });
 
@@ -588,24 +600,91 @@ test('should not trigger changeHandlers when value was not changed (object)', fu
   var v = dv({a:1,b:{c:2,d:3}}),
     spy = sinon.spy();
   v.onchange(spy);
-  v.value = {a:1,b:{c:2,d:3}};
+  v.set({a:1,b:{c:2,d:3}});
   ok(spy.notCalled);
 });
 
-test('should propagate change to linked instances when changed', function() {
+test('should propagate change to linked instances when value changes', function() {
   var v = dv(3),
     v2 = dv(4),
     v3 = dv(5);
 
   v3.link(v2);
-  v2.value = 1;
+  v2.set(1);
   ok(v3._value == 1);
 
   v2.link(v);
-  v.value = 2;
+  v.set(2);
 
   ok(v2._value == 2);
   ok(v3._value == 2);
+});
+
+test('should not propagate change to linked instances when value does not change', function() {
+  var v1 = dv(3);
+  var v2 = dv(4);
+  var v3 = dv(5);
+
+  v3.link(v2);
+  v3._value = 12;
+  v2.set(4);
+  equal(v3._value, 12);
+
+  v2.link(v1);
+  v2._value = 33;
+  v1.set(3);
+  ok(v2._value == 33);
+  ok(v3._value == 12);
+});
+
+test('should propagate change to lifted instances and their lifts and so on when value changes', function() {
+  var dv1 = dv(3);
+
+  var liftFn1 = sinon.spy(function (z) { return 2 * z; });
+  var liftFn2 = sinon.spy(function (z) { return 2 * z; });
+  var liftFn3 = sinon.spy(function (z) { return 2 * z; });
+  var liftFn4 = sinon.spy(function (z) { return 2 * z; });
+  var liftFn5 = sinon.spy(function (z) { return 2 * z; });
+
+  var lifted1 = dv.lift(liftFn1)(dv1);
+  var lifted2 = dv.lift(liftFn2)(lifted1);
+  var lifted3 = dv.lift(liftFn3)(lifted2);
+  var lifted4 = dv.lift(liftFn4)(lifted3);
+  var lifted5 = dv.lift(liftFn5)(lifted4);
+
+  equal(liftFn1.callCount, 1);
+  equal(liftFn2.callCount, 1);
+  equal(liftFn3.callCount, 1);
+  equal(liftFn4.callCount, 1);
+  equal(liftFn5.callCount, 1);
+
+  dv1.set(4, true);
+
+  equal(liftFn1.callCount, 2);
+  equal(liftFn2.callCount, 2);
+  equal(liftFn3.callCount, 2);
+  equal(liftFn4.callCount, 2);
+  equal(liftFn5.callCount, 2);
+});
+
+test('should not propagate change to lifted instances when value does not change', function() {
+  var v1 = dv(3);
+  var v2 = dv(4);
+  var v3 = dv(5);
+  var liftFn = sinon.spy(function (a, b, c) {
+      return a + b + c;
+    });
+  var lifted = dv.lift(liftFn)(v1, v2, v3);
+  var liftFn2 = sinon.spy(function (z) {
+      return 2 * z;
+    });
+  var lifted2 = dv.lift(liftFn2)(lifted);
+
+  equal(liftFn.callCount, 1);
+  equal(liftFn2.callCount, 1);
+  v2.set(4);
+  equal(liftFn.callCount, 1);
+  equal(liftFn2.callCount, 1);
 });
 
 test('should trigger change before propagating it', function() {
@@ -615,7 +694,7 @@ test('should trigger change before propagating it', function() {
     propagate = sinon.spy(v, '_propagateChange');
 
   v2.link(v);
-  v.value = 2;
+  v.set(2);
 
   ok(trigger.calledOnce);
   ok(propagate.calledOnce);
@@ -639,13 +718,170 @@ test('lift function should receive current value as context (this)', function ()
       return a + b + c;
     })(dvA, dvB, dvC);
 
-  dvA.value = 4;
-  dvB.value = 5;
-  dvC.value = 6;
+  dvA.set(4);
+  dvB.set(5);
+  dvC.set(6);
 
   deepEqual(values, [ window, 6, 9, 12 ]);
   deepEqual(values2, [ undefined, 6, 9, 12 ]);
 });
+
+
+
+module('dv#set setter (forceFlag set)');
+
+test('should set value correctly', function() {
+  var v = dv(3);
+  v.set(123, true);
+  equal(v._value, 123);
+});
+
+test('should trigger change handlers', function() {
+  var v = dv(3),
+    spy1 = sinon.spy(),
+    spy2 = sinon.spy(),
+    spy3 = sinon.spy();
+
+  v.onchange(spy1);
+  v.onchange(spy3);
+  v.onchange(spy2);
+
+  v.set(123, true);
+  ok(spy1.calledOnce);
+  ok(spy2.calledOnce);
+  ok(spy3.calledOnce);
+  sinon.assert.callOrder(spy1, spy3, spy2);
+});
+
+test('should trigger changeHandlers when value was not changed (scalar types)', function() {
+  var values = [3, '123', true, null, Infinity, undefined];
+  for (var i = 0; i < values.length; i++) {
+    var v = dv(values[i]),
+      spy = sinon.spy();
+    v.onchange(spy);
+    v.set(values[i], true);
+    ok(spy.calledOnce);
+  }
+});
+
+test('should trigger changeHandlers when value was not changed (array)', function() {
+  var v = dv([1,2,[3,4],5]),
+    spy = sinon.spy();
+  v.onchange(spy);
+  v.set([1,2,[3,4],5], true);
+  ok(spy.calledOnce);
+});
+
+test('should not trigger changeHandlers when value was not changed (object)', function() {
+  var v = dv({a:1,b:{c:2,d:3}}),
+    spy = sinon.spy();
+  v.onchange(spy);
+  v.set({a:1,b:{c:2,d:3}}, true);
+  ok(spy.calledOnce);
+});
+
+test('should always propagate change to linked instances', function() {
+  var v1 = dv(3);
+  var v2 = dv(4);
+  var v3 = dv(5);
+
+  v3.link(v2);
+  v3._value = 12;
+  v2.set(4, true);
+  equal(v3._value, 4);
+
+  v2.link(v1);
+  v2._value = 33;
+  v1.set(3, true);
+  ok(v2._value == 3);
+  ok(v3._value == 3);
+});
+
+test('should always propagate change to lifted instances and their lifts and so on', function() {
+  var dv1 = dv(3);
+
+  var liftFn1 = sinon.spy(function (z) { return 2 * z; });
+  var liftFn2 = sinon.spy(function (z) { return 2 * z; });
+  var liftFn3 = sinon.spy(function (z) { return 2 * z; });
+  var liftFn4 = sinon.spy(function (z) { return 2 * z; });
+  var liftFn5 = sinon.spy(function (z) { return 2 * z; });
+
+  var lifted1 = dv.lift(liftFn1)(dv1);
+  var lifted2 = dv.lift(liftFn2)(lifted1);
+  var lifted3 = dv.lift(liftFn3)(lifted2);
+  var lifted4 = dv.lift(liftFn4)(lifted3);
+  var lifted5 = dv.lift(liftFn5)(lifted4);
+
+  equal(liftFn1.callCount, 1);
+  equal(liftFn2.callCount, 1);
+  equal(liftFn3.callCount, 1);
+  equal(liftFn4.callCount, 1);
+  equal(liftFn5.callCount, 1);
+
+  dv1.set(4, true);
+
+  equal(liftFn1.callCount, 2);
+  equal(liftFn2.callCount, 2);
+  equal(liftFn3.callCount, 2);
+  equal(liftFn4.callCount, 2);
+  equal(liftFn5.callCount, 2);
+});
+
+test('should trigger change before propagating it', function() {
+  var v = dv(3),
+    v2 = dv(4),
+    trigger = sinon.spy(v, '_triggerChange'),
+    propagate = sinon.spy(v, '_propagateChange');
+
+  v2.link(v);
+  v.set(2, true);
+
+  ok(trigger.calledOnce);
+  ok(propagate.calledOnce);
+  sinon.assert.callOrder(trigger, propagate);
+});
+
+test('lift function should receive current value as context (this)', function () {
+  var lift,
+    dvA = dv(1),
+    dvB = dv(2),
+    dvC = dv(3),
+    values = [],
+    values2 = [],
+    lifted = dv.lift(function (a, b, c) {
+      values.push(this);
+      return a + b + c;
+    })(dvA, dvB, dvC),
+    lifted2 = dv.lift(function (a, b, c) {
+       'use strict';
+      values2.push(this);
+      return a + b + c;
+    })(dvA, dvB, dvC);
+
+  dvA.set(4, true);
+  dvB.set(5, true);
+  dvC.set(6, true);
+
+  deepEqual(values, [ window, 6, 9, 12 ]);
+  deepEqual(values2, [ undefined, 6, 9, 12 ]);
+});
+
+
+
+module('dv#value setter');
+
+test('should call #set setter with the provided value and without forceFlag', function() {
+  var v = dv(3);
+  var setter = sinon.spy(v, 'set');
+  v.value = 5;
+  equal(setter.callCount, 1);
+  ok(setter.calledWithExactly(5));
+
+  v.value = 5;
+  equal(setter.callCount, 2);
+  ok(setter.calledWithExactly(5));
+});
+
 
 
 
@@ -690,7 +926,7 @@ test('should calculate value when there is no initial value provided (single arg
   dvB = dvA.map(mapFn);
 
   ok(dv.lift.calledOnce);
-  ok(dv.lift.calledWith(mapFn));
+  ok(dv.lift.calledWithExactly(mapFn));
 
   equal(dvB._value, 11);
 
@@ -731,7 +967,7 @@ test('should not calculate value when there is initial value provided', function
   dvB = dvA.map(10001, mapFn);
 
   ok(dv.lift.calledOnce);
-  ok(dv.lift.calledWith(10001, mapFn));
+  ok(dv.lift.calledWithExactly(10001, mapFn));
 
   equal(dvB._value, 10001);
 
