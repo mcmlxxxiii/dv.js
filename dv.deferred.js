@@ -1,10 +1,10 @@
 /*
- * dv.deferred.js v0.1
+ * dv.deferred.js v0.2.0
  *
- * Copyright 2014 by Mykhaylo Gavrylyuk, https://github.com/mcmlxxxiii
+ * Copyright 2014-2015 by Mykhaylo Gavrylyuk, https://github.com/mcmlxxxiii
  * Licensed under the MIT license
  *
- * Date: Sun Jul 6, 2014
+ * Date: Oct 23, 2015
  */
 
 var dv,

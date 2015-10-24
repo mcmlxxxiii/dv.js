@@ -1,5 +1,5 @@
-HEAD (after v0.1)
-=================
+v0.2.0 (Oct 23, 2015)
+===================
 
 - #link not only changes the value on dependant dv but also propagates the change further to its deps (and so on) when value is different from current.
 
@@ -74,7 +74,7 @@ var strSize = dv.lift(function (str) {
 ```
 
 
-v0.1 (Sun Jul 06, 2014)
+v0.1 (Jul 06, 2014)
 =======================
 - new dv(value)
 - new dv(liftFn, liftFnArgs)
