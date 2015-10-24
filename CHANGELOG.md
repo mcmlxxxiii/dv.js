@@ -1,6 +1,8 @@
 HEAD (after v0.1)
 =================
 
+- #link not only changes the value on dependant dv but also propagates the change further to its deps (and so on) when value is different from current.
+
 - #onchange method nrenamed into #onChange.
 
 - Setting value with forceFlag now propagates the change to the lifts and their lifts and so on.

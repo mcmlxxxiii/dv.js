@@ -463,7 +463,6 @@ test('should return self', function() {
   ok(v === v.link(otherV));
 });
 
-// TODO test for link's initial values.
 
 
 module('dv#unlink method');
@@ -611,37 +610,42 @@ test('should not trigger changeHandlers when value was not changed (object)', fu
   ok(spy.notCalled);
 });
 
-test('should propagate change to linked instances when value changes', function() {
-  var v = dv(3),
-    v2 = dv(4),
-    v3 = dv(5);
+test('should propagate change to linked instances (and so on) when value changes', function() {
+  var v1 = dv(1);
+  var v2 = dv(2);
+  var v3 = dv(3);
 
   v3.link(v2);
-  v2.set(1);
-  ok(v3._value == 1);
+  v2.link(v1);
 
-  v2.link(v);
-  v.set(2);
+  v2.set(22);
+  ok(v3._value == 22);
+  ok(v2._value == 22);
+  ok(v1._value == 1);
 
-  ok(v2._value == 2);
-  ok(v3._value == 2);
+  v1.set(11);
+
+  ok(v2._value == 11);
+  ok(v3._value == 11);
 });
 
 test('should not propagate change to linked instances when value does not change', function() {
-  var v1 = dv(3);
-  var v2 = dv(4);
-  var v3 = dv(5);
+  var v1 = dv(1);
+  var v2 = dv(2);
+  var v3 = dv(3);
 
   v3.link(v2);
   v3._value = 12;
-  v2.set(4);
-  equal(v3._value, 12);
+  v2.set(2);
+  equal(v3._value, 12, 'does not propagate');
 
-  v2.link(v1);
+  v2.link(v1); // v2==2 && v1==1, changes v2 to 1 and propagates to v3
+  ok(v3._value == 1);
+
   v2._value = 33;
-  v1.set(3);
-  ok(v2._value == 33);
-  ok(v3._value == 12);
+  v1.set(1);
+  ok(v2._value == 33, 'does not propagate');
+  ok(v3._value == 1, 'does not receive propagation');
 });
 
 test('should propagate change to lifted instances and their lifts and so on when value changes', function() {

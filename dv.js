@@ -150,7 +150,7 @@ dv = (function () {
     return this;
   };
 
-  dv.prototype.link = function (dvOther, initialValue) {
+  dv.prototype.link = function (dvOther) {
     if (!(dvOther instanceof dv))
       throw new Error('dv#link: accepts other dv as the single argument only!');
     if (this === dvOther)
@@ -158,8 +158,7 @@ dv = (function () {
     this._linkedTo = dvOther;
     if (!this._linkedTo._deps) { this._linkedTo._deps = []; }
     this._linkedTo._deps.push(this);
-    //this._value = arguments.length > 1 ? initialValue : this._linkedTo._value;
-    this._value = this._linkedTo._value;
+    this.set(this._linkedTo.get());
     return this;
   };
 
