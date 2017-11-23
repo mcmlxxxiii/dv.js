@@ -1,3 +1,11 @@
+v0.3.0 (Nov 23, 2017)
+===================
+
+- Removed jQuery like Deferred objects (dv.deferred) and jQuery like $.when (dv.when).
+
+- Removed jQuery bindings.
+
+
 v0.2.0 (Oct 23, 2015)
 ===================
 
